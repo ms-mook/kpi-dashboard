@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: "KPI Dashboard - หน่วยเจาะเลือด",
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col font-sans">
         <div className="ambient-bg" aria-hidden="true" />
         {children}
+        <SiteFooter />
       </body>
     </html>
   );
