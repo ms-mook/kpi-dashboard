@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import {
   KeyRound, TrendingUp, TrendingDown, Users, CalendarClock, Droplet, Timer, ShieldCheck,
-  XCircle, Wrench, Smile, MessageSquareWarning, LayoutDashboard, CalendarDays,
+  XCircle, Wrench, Smile, MessageSquareWarning, LayoutDashboard, CalendarDays, Table2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -37,6 +37,7 @@ import { LiveClock } from "@/components/LiveClock";
 import { ExecutiveSummary } from "@/components/ExecutiveSummary";
 import { SectionNav, type SectionNavItem } from "@/components/SectionNav";
 import { ComplaintCountChart, type ComplaintCountRow } from "@/components/ComplaintCountChart";
+import { PatientCategoryCard } from "@/components/PatientCategoryCard";
 import { linearForecastNextYear } from "@/lib/forecast";
 import { useTheme } from "@/lib/useTheme";
 
@@ -538,6 +539,7 @@ export default function DashboardPage() {
       ? [
           { id: "sec-service", label: "ผู้รับบริการ", icon: Users },
           { id: "sec-monthly", label: "รายเดือน", icon: CalendarDays },
+          { id: "sec-types", label: "ประเภทผู้รับบริการ", icon: Table2 },
         ]
       : []),
     { id: "sec-yearly", label: "แนวโน้มรายปี", icon: CalendarClock },
@@ -841,6 +843,17 @@ export default function DashboardPage() {
               );
             })}
           </div>
+
+          {/* ประเภทผู้รับบริการ — 10 groups across all จุดบริการ, by month */}
+          {fiscalYear != null && (
+            <PatientCategoryCard
+              records={records}
+              fiscalYear={fiscalYear}
+              monthIndex={monthIndex}
+              colors={chartColors}
+              i={8}
+            />
+          )}
         </>
       )}
 
