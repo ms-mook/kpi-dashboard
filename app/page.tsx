@@ -26,8 +26,6 @@ import {
   type PeriodType, type RangeKey, yearMonths, availableYears, rangeIndices, rangeOptions, periodLabel,
   filterRecords, pointMonthly, typeTotals, sameMonthsLastYear,
 } from "@/lib/service-filter";
-import type { PatientCategoryKey } from "@/lib/patient-categories";
-import { CategoryPicker } from "@/components/CategoryPicker";
 import {
   TatRecordRow, availableTatYears, tatSeriesByPoint, tatMonthLabels, tatByPointForMonth,
 } from "@/lib/aggregate-tat";
@@ -239,7 +237,6 @@ export default function DashboardPage() {
   const [customFrom, setCustomFrom] = useState(0);
   const [customTo, setCustomTo] = useState(11);
   const [pointFilter, setPointFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<PatientCategoryKey[] | "all">("all");
   const [showYoY, setShowYoY] = useState(true);
 
   const [tatRecords, setTatRecords] = useState<TatRecordRow[]>([]);
@@ -361,13 +358,8 @@ export default function DashboardPage() {
   const selIdx = useMemo(() => rangeIndices(range, customFrom, customTo), [range, customFrom, customTo]);
   const selMonths = useMemo(() => selIdx.map((i) => months12[i]).filter((m) => m != null), [selIdx, months12]);
   const isSelected = (i: number) => range === "all" || selIdx.includes(i);
-  // Point + category filtered rows (everything in this section reads these).
-  const svcRecords = useMemo(
-    () => filterRecords(records, pointFilter, categoryFilter),
-    [records, pointFilter, categoryFilter]
-  );
-  // Point-filtered only: the base for the ประเภท card's "% of all patients".
-  const pointRecords = useMemo(() => filterRecords(records, pointFilter, "all"), [records, pointFilter]);
+  // Point-filtered rows (everything in this section reads these).
+  const svcRecords = useMemo(() => filterRecords(records, pointFilter, "all"), [records, pointFilter]);
   const shownPoints = useMemo(
     () => (pointFilter === "all" ? SERVICE_POINTS : [pointFilter]),
     [pointFilter, SERVICE_POINTS]
@@ -378,12 +370,7 @@ export default function DashboardPage() {
     total: selIdx.reduce((s, i) => s + (p.values[i] ?? 0), 0),
   }));
   const grandTotal = displayByPoint.reduce((s, p) => s + p.total, 0);
-  const filterSuffix = [
-    pointFilter !== "all" ? pointFilter : null,
-    categoryFilter !== "all" ? `${categoryFilter.length} ประเภท` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const filterSuffix = pointFilter !== "all" ? pointFilter : "";
   const yearLabel = periodType === "fiscal" ? `ปีงบ ${svcYear}` : `ปีปฏิทิน ${svcYear}`;
   const scopeLabel =
     (svcYear != null ? periodLabel(periodType, svcYear, range, customFrom, customTo) : "") +
@@ -391,14 +378,13 @@ export default function DashboardPage() {
   // Same months one year earlier, only months entered in both years.
   const heroChange = useMemo(() => sameMonthsLastYear(svcRecords, records, selMonths), [svcRecords, records, selMonths]);
   const filtersActive =
-    periodType !== "fiscal" || range !== "all" || pointFilter !== "all" || categoryFilter !== "all";
+    periodType !== "fiscal" || range !== "all" || pointFilter !== "all";
   function resetFilters() {
     setPeriodType("fiscal");
     setRange("all");
     setCustomFrom(0);
     setCustomTo(11);
     setPointFilter("all");
-    setCategoryFilter("all");
   }
 
   const monthlyChartData = months12.map((m, i) => {
@@ -780,9 +766,6 @@ export default function DashboardPage() {
                 ))}
               </select>
             </FilterField>
-            <FilterField label="ประเภทผู้รับบริการ">
-              <CategoryPicker value={categoryFilter} onChange={setCategoryFilter} />
-            </FilterField>
             {filtersActive && (
               <button type="button" onClick={resetFilters} className="btn btn-ghost btn-sm text-base-content/60">
                 ล้างตัวกรอง
@@ -862,7 +845,7 @@ export default function DashboardPage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/40">
-                  แนวโน้ม 6 ปีล่าสุด{pointFilter !== "all" || categoryFilter !== "all" ? " (ทุกจุดบริการ ทุกประเภท)" : ""}
+                  แนวโน้ม 6 ปีล่าสุด{pointFilter !== "all" ? " (ทุกจุดบริการ)" : ""}
                   {incompleteTrend && (
                     <span className="rounded-field bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning">
                       ปีงบ {incompleteTrend.year} ยังไม่ครบ ({incompleteTrend.filledMonths}/12 เดือน) · เส้นประ
@@ -959,10 +942,10 @@ export default function DashboardPage() {
           {/* ประเภทผู้รับบริการ — 10 groups across all จุดบริการ, by month */}
           {svcYear != null && (
             <PatientCategoryCard
-              records={pointRecords}
+              records={svcRecords}
               months={months12}
               selectedIdx={range === "all" ? null : selIdx}
-              categories={categoryFilter}
+              categories="all"
               yearLabel={yearLabel}
               scopeLabel={scopeLabel}
               colors={chartColors}
