@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { withPmGroups, withKpiIndicatorConfig, MONTH_NAMES_TH, fiscalYearOf, fiscalYearMonthsFilled } from "@/lib/constants";
 import { monthTotal, RecordRow } from "@/lib/aggregate";
 import { kpiMonthResult, KpiRecordRow } from "@/lib/aggregate-kpi";
+import { ratioIssues, describeRatioIssue } from "@/lib/kpi-validate";
 import {
   Loader2, Save, ShieldCheck, Info, XCircle, Wrench, Timer, Smile, MessageSquareWarning, Settings2, ListChecks,
+  AlertTriangle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { PmMachine } from "@/lib/sheets-pm-machines";
@@ -197,7 +199,21 @@ export function KpiEntryForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [records, edits, year, month, attendanceTotal]);
 
+  // Parts that exceed their whole this month (e.g. รอไม่เกิน 30 นาที >
+  // ผู้รับบริการทั้งหมด → >100%). Shown on the card and block saving; the API
+  // rejects them too.
+  const issues = useMemo(() => {
+    const month0 = new Map(
+      draftRecords.filter((r) => r.year === year && r.month === month).map((r) => [keyOf(r.indicator, r.field), r.value])
+    );
+    return ratioIssues(KPI_INDICATORS, (id, field) => month0.get(keyOf(id, field)), attendanceTotal);
+  }, [draftRecords, year, month, KPI_INDICATORS, attendanceTotal]);
+
   async function handleSubmit() {
+    if (issues.length) {
+      setStatus({ type: "err", text: `ตัวตั้งมากกว่าตัวหาร แก้ก่อนบันทึก — ${issues.map(describeRatioIssue).join(" · ")}` });
+      return;
+    }
     setSaving(true);
     setStatus(null);
     const entries = allFieldSlots()
@@ -477,6 +493,23 @@ export function KpiEntryForm() {
                       )}
                     </div>
                   )}
+
+                  {issues
+                    .filter((iss) => iss.indicatorId === indicator.id)
+                    .map((iss, k) => (
+                      <div
+                        key={k}
+                        role="alert"
+                        className="mt-4 flex items-start gap-2 rounded-field bg-error/10 px-3 py-2 text-xs text-error"
+                      >
+                        <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                        <span>
+                          {iss.numeratorLabel} ({iss.numerator.toLocaleString("en-US")}) มากกว่า{" "}
+                          {iss.denominatorLabel} ({iss.denominator.toLocaleString("en-US")}) — ตัวตั้งต้องไม่เกินตัวหาร
+                          แก้ตัวเลขก่อนบันทึก
+                        </span>
+                      </div>
+                    ))}
                 </div>
               </BentoCard>
             );
@@ -484,10 +517,17 @@ export function KpiEntryForm() {
         </div>
 
         <div className="glass-panel sticky bottom-4 flex items-center justify-between rounded-box p-4">
-          <div className="text-sm text-base-content/60">กรอกครบ {KPI_INDICATORS.length} ตัวชี้วัดแล้วกดบันทึก</div>
+          {issues.length > 0 ? (
+            <div className="flex items-center gap-1.5 text-sm text-error">
+              <AlertTriangle size={15} className="shrink-0" />
+              มี {issues.length} รายการที่ตัวตั้งมากกว่าตัวหาร แก้ก่อนบันทึก
+            </div>
+          ) : (
+            <div className="text-sm text-base-content/60">กรอกครบ {KPI_INDICATORS.length} ตัวชี้วัดแล้วกดบันทึก</div>
+          )}
           <button
             onClick={handleSubmit}
-            disabled={saving || loading}
+            disabled={saving || loading || issues.length > 0}
             className="btn btn-primary gap-2 shadow-lg shadow-primary/20"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}

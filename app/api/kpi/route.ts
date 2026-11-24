@@ -3,6 +3,7 @@ import { readAllKpiRecords, saveKpiMonth } from "@/lib/sheets-kpi";
 import { withPmGroups, withKpiIndicatorConfig, kpiFieldType } from "@/lib/constants";
 import { readAllPmMachines } from "@/lib/sheets-pm-machines";
 import { readAllKpiIndicatorConfig } from "@/lib/sheets-kpi-indicators";
+import { ratioIssues, describeRatioIssue } from "@/lib/kpi-validate";
 
 // Same pattern as /api/records and /api/tat — live read on every GET, no
 // prerendering/caching.
@@ -85,6 +86,19 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: `จำนวนสูงเกินจริงสำหรับ ${e.indicator}.${e.field}` }, { status: 400 });
         }
       }
+    }
+
+    // A part can't exceed its whole (e.g. "รอไม่เกิน 30 นาที" > "ผู้รับบริการ
+    // ทั้งหมด" would show as >100%). The form sends the whole month, so each
+    // pair is checked against what's being saved. "ratio_auto" (denominator
+    // = the month's attendance total) is checked in the form only.
+    const byField = new Map(entries.map((e) => [`${e.indicator}|${e.field}`, String(e.value)]));
+    const issues = ratioIssues(indicators, (id, field) => byField.get(`${id}|${field}`));
+    if (issues.length) {
+      return NextResponse.json(
+        { error: `ตัวตั้งมากกว่าตัวหาร — ${issues.map(describeRatioIssue).join(" · ")}` },
+        { status: 400 }
+      );
     }
 
     await saveKpiMonth(year, month, entries);
