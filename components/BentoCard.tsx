@@ -7,14 +7,18 @@ export function BentoCard({
   className = "",
   i = 0,
   as: Tag = "div",
+  id,
 }: {
   children: ReactNode;
   className?: string;
   i?: number;
   as?: "div" | "section";
+  /** In-page anchor target (e.g. for SectionNav). */
+  id?: string;
 }) {
   return (
     <Tag
+      id={id}
       className={`glass-panel card-hover bento-enter rounded-box p-5 ${className}`}
       style={{ "--bento-i": i } as React.CSSProperties}
     >

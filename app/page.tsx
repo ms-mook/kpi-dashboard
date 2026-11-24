@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import {
   KeyRound, TrendingUp, TrendingDown, Users, CalendarClock, Droplet, Timer, ShieldCheck,
-  XCircle, Wrench, Smile, MessageSquareWarning,
+  XCircle, Wrench, Smile, MessageSquareWarning, LayoutDashboard, CalendarDays,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -35,6 +35,7 @@ import { StatusBanner } from "@/components/StatusBanner";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { LiveClock } from "@/components/LiveClock";
 import { ExecutiveSummary } from "@/components/ExecutiveSummary";
+import { SectionNav, type SectionNavItem } from "@/components/SectionNav";
 import { linearForecastNextYear } from "@/lib/forecast";
 import { useTheme } from "@/lib/useTheme";
 
@@ -520,6 +521,24 @@ export default function DashboardPage() {
     });
   }, [kpiRecords, records, fiscalYear, kpiIndicators]);
 
+  // One pill per section that's actually rendered below (ids must match the
+  // anchors in the JSX). Sections that only show a "no data yet" banner
+  // still get a pill so the bar's layout stays the same as data arrives.
+  const sectionNavItems: SectionNavItem[] = [
+    { id: "sec-summary", label: "สรุปภาพรวม", icon: LayoutDashboard },
+    ...(years.length > 0
+      ? [
+          { id: "sec-service", label: "ผู้รับบริการ", icon: Users },
+          { id: "sec-monthly", label: "รายเดือน", icon: CalendarDays },
+        ]
+      : []),
+    { id: "sec-yearly", label: "แนวโน้มรายปี", icon: CalendarClock },
+    { id: "sec-tat", label: "TAT", icon: Timer },
+    ...(kpiTrendByIndicator.length > 0
+      ? [{ id: "sec-kpi-trend", label: "ตัวชี้วัดรายเดือน", icon: TrendingUp }]
+      : []),
+  ];
+
   let content: React.ReactNode;
 
   if (loading) {
@@ -547,6 +566,7 @@ export default function DashboardPage() {
   } else {
     content = (
     <div className="space-y-6 pb-16">
+      <section id="sec-summary" className="scroll-mt-24 space-y-6">
       {failedKpis.length > 0 && kpiViewPair && (
         <StatusBanner
           type="warning"
@@ -602,6 +622,7 @@ export default function DashboardPage() {
           />
         )
       )}
+      </section>
 
       {years.length === 0 && (
         <StatusBanner
@@ -617,7 +638,7 @@ export default function DashboardPage() {
 
       {years.length > 0 && (
         <>
-          <div className="flex flex-wrap items-center gap-3">
+          <div id="sec-service" className="flex scroll-mt-24 flex-wrap items-center gap-3">
             <span className="text-xs font-medium uppercase tracking-wide text-base-content/40">
               ปีงบประมาณ
             </span>
@@ -759,7 +780,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Monthly stacked bar */}
-          <BentoCard i={5} className="!p-5">
+          <BentoCard i={5} id="sec-monthly" className="scroll-mt-24 !p-5">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-base-content">
                 จำนวนผู้รับบริการรายเดือน แยกตามจุดบริการ
@@ -816,7 +837,7 @@ export default function DashboardPage() {
       )}
 
       {/* Yearly trend */}
-      <BentoCard i={9} className="!p-5">
+      <BentoCard i={9} id="sec-yearly" className="scroll-mt-24 !p-5">
         <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="icon-badge flex h-7 w-7 items-center justify-center rounded-field bg-primary/15 text-primary">
@@ -946,6 +967,7 @@ export default function DashboardPage() {
       </BentoCard>
 
       {/* TAT section */}
+      <section id="sec-tat" className="scroll-mt-24">
       {tatError ? (
         <StatusBanner type="error" title="โหลดข้อมูล TAT ไม่สำเร็จ" message={tatError} className="mt-8" />
       ) : tatYears.length > 0 && tatYear ? (
@@ -1080,6 +1102,7 @@ export default function DashboardPage() {
           }
         />
       )}
+      </section>
 
       {/* Per-indicator trend charts — kept separate from the detailed score
           tiles (removed per request): this is the "how did each indicator
@@ -1087,7 +1110,7 @@ export default function DashboardPage() {
           summary above. */}
       {kpiTrendByIndicator.length > 0 && (
         <>
-          <div className="mb-3 mt-8 flex items-center justify-between gap-2">
+          <div id="sec-kpi-trend" className="mb-3 mt-8 flex scroll-mt-24 items-center justify-between gap-2">
             <h3 className="text-xs font-medium text-base-content/50">แนวโน้มรายตัวชี้วัด</h3>
             <label className="flex cursor-pointer items-center gap-2 text-xs text-base-content/60">
               <input
@@ -1252,6 +1275,8 @@ export default function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {!loading && !error && <SectionNav items={sectionNavItems} />}
 
       {content}
     </div>
