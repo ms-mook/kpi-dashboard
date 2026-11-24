@@ -69,17 +69,26 @@ function emptyCounts(): CategoryCounts {
  * that month's total, and whether the month has any data at all (so an
  * unentered month shows "-", not 0). `yearTotals` sums the whole year. */
 export function patientCategoriesByMonth(records: RecordRow[], fiscalYear: number) {
-  const fy = fiscalYearMonths(fiscalYear);
-  const labels = [MONTH_ABBR_TH[9], MONTH_ABBR_TH[10], MONTH_ABBR_TH[11], ...MONTH_ABBR_TH.slice(0, 9)];
-  const months = fy.map(({ year, month }, i) => ({
-    label: labels[i],
+  return patientCategoriesForMonths(
+    records,
+    fiscalYearMonths(fiscalYear).map((m) => ({ ...m, label: MONTH_ABBR_TH[m.month - 1] }))
+  );
+}
+
+/** Same breakdown over any list of months (fiscal or calendar order). */
+export function patientCategoriesForMonths(
+  records: RecordRow[],
+  monthList: { year: number; month: number; label: string }[]
+) {
+  const months = monthList.map(({ year, month, label }) => ({
+    label,
     year,
     month,
     counts: emptyCounts(),
     total: 0,
     hasData: false,
   }));
-  const index = new Map(fy.map(({ year, month }, i) => [`${year}-${month}`, i]));
+  const index = new Map(monthList.map(({ year, month }, i) => [`${year}-${month}`, i]));
   const unmatched = new Set<string>();
 
   for (const r of records) {

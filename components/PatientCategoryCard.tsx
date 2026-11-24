@@ -5,7 +5,8 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { Users, AlertTriangle } from "lucide-react";
 import type { RecordRow } from "@/lib/aggregate";
 import {
-  PATIENT_CATEGORIES, OTHER_CATEGORY, patientCategoriesByMonth, type PatientCategoryKey,
+  PATIENT_CATEGORIES, OTHER_CATEGORY, patientCategoriesForMonths, type PatientCategoryKey,
+  type CategoryCounts,
 } from "@/lib/patient-categories";
 import { BentoCard } from "@/components/BentoCard";
 
@@ -25,33 +26,50 @@ const pct = (part: number, whole: number) => (whole > 0 ? (part / whole) * 100 :
  * and (3) the exact numbers in a table. */
 export function PatientCategoryCard({
   records,
-  fiscalYear,
-  monthIndex,
+  months,
+  selectedIdx,
+  categories,
+  yearLabel,
+  scopeLabel,
   colors,
   i = 0,
 }: {
+  /** Rows already limited to the chosen จุดบริการ (NOT by category: the %
+   * is always of all patients at those points). */
   records: RecordRow[];
-  fiscalYear: number;
-  /** "all" = whole fiscal year; 0..11 = fiscal-order month (0 = ต.ค.). */
-  monthIndex: number | "all";
+  /** The 12 months of the chosen fiscal/calendar year, in display order. */
+  months: { year: number; month: number; label: string }[];
+  /** Indices into `months` the period filter selects; null = whole year. */
+  selectedIdx: number[] | null;
+  /** Which groups to show ("all" = all 10, plus "อื่น ๆ" if any). */
+  categories: PatientCategoryKey[] | "all";
+  yearLabel: string;
+  scopeLabel: string;
   colors: ChartColors;
   i?: number;
 }) {
   const [mode, setMode] = useState<Mode>("count");
-  const data = useMemo(() => patientCategoriesByMonth(records, fiscalYear), [records, fiscalYear]);
+  const data = useMemo(() => patientCategoriesForMonths(records, months), [records, months]);
 
-  const cats: { key: PatientCategoryKey; label: string }[] = [
-    ...PATIENT_CATEGORIES,
-    ...(data.hasOther ? [OTHER_CATEGORY] : []),
-  ];
+  const cats: { key: PatientCategoryKey; label: string }[] =
+    categories === "all"
+      ? [...PATIENT_CATEGORIES, ...(data.hasOther ? [OTHER_CATEGORY] : [])]
+      : PATIENT_CATEGORIES.filter((c) => categories.includes(c.key));
 
-  const selected = monthIndex === "all" ? null : data.months[monthIndex];
-  const scopeCounts = selected ? selected.counts : data.yearTotals;
-  const scopeTotal = selected ? selected.total : data.yearTotal;
-  const scopeLabel = selected ? `เดือน ${selected.label} ${selected.year}` : `ปีงบ ${fiscalYear}`;
+  const inScope = (idx: number) => selectedIdx == null || selectedIdx.includes(idx);
+  const scopeMonths = data.months.filter((_, idx) => inScope(idx));
+  const sumCounts = (list: typeof data.months) => {
+    const out = {} as CategoryCounts;
+    for (const c of [...PATIENT_CATEGORIES, OTHER_CATEGORY]) out[c.key] = list.reduce((s, m) => s + m.counts[c.key], 0);
+    return out;
+  };
+  const scopeCounts = sumCounts(scopeMonths);
+  const scopeTotal = scopeMonths.reduce((s, m) => s + m.total, 0);
+  const shownTotal = cats.reduce((s, c) => s + scopeCounts[c.key], 0);
   const ranked = [...cats].sort((a, b) => scopeCounts[b.key] - scopeCounts[a.key]);
   const maxCount = Math.max(1, ...cats.map((c) => scopeCounts[c.key]));
   const filled = data.months.filter((m) => m.hasData).length;
+  const filteredCats = categories !== "all";
 
   return (
     <BentoCard i={i} id="sec-types" className="scroll-mt-24 !p-5">
@@ -93,7 +111,10 @@ export function PatientCategoryCard({
         <>
           {/* 1 — compare the groups (ranked, one hue) */}
           <h3 className="mb-2 text-xs font-medium text-base-content/50">
-            เปรียบเทียบระหว่างประเภท · รวม {fmt(scopeTotal)} คน
+            เปรียบเทียบระหว่างประเภท ·{" "}
+            {filteredCats
+              ? `ประเภทที่เลือก ${fmt(shownTotal)} คน จากทั้งหมด ${fmt(scopeTotal)} คน`
+              : `รวม ${fmt(scopeTotal)} คน`}
           </h3>
           <div className="space-y-2.5">
             {ranked.map((c) => {
@@ -165,7 +186,7 @@ export function PatientCategoryCard({
                           <Cell
                             key={idx}
                             fill={BAR}
-                            fillOpacity={monthIndex === "all" || monthIndex === idx ? 1 : 0.25}
+                            fillOpacity={inScope(idx) ? 1 : 0.25}
                           />
                         ))}
                       </Bar>
@@ -178,7 +199,7 @@ export function PatientCategoryCard({
 
           {/* 3 — exact numbers */}
           <h3 className="mb-2 mt-6 text-xs font-medium text-base-content/50">
-            ตารางจำนวน (ร้อยละ) · ปีงบ {fiscalYear} · มีข้อมูล {filled}/12 เดือน
+            ตารางจำนวน (ร้อยละ) · {yearLabel} · มีข้อมูล {filled}/12 เดือน
           </h3>
           <div className="overflow-x-auto rounded-field border border-base-content/8">
             <table className="w-full min-w-[960px] text-[11px]">
@@ -188,12 +209,14 @@ export function PatientCategoryCard({
                   {data.months.map((m, idx) => (
                     <th
                       key={m.label}
-                      className={`px-1.5 py-1.5 text-right font-medium ${monthIndex === idx ? "bg-primary/10 text-primary" : ""}`}
+                      className={`px-1.5 py-1.5 text-right font-medium ${selectedIdx != null && selectedIdx.includes(idx) ? "bg-primary/10 text-primary" : ""}`}
                     >
                       {m.label}
                     </th>
                   ))}
-                  <th className="px-2 py-1.5 text-right font-semibold text-base-content/70">รวม</th>
+                  <th className="px-2 py-1.5 text-right font-semibold text-base-content/70">
+                    {selectedIdx == null ? "รวมทั้งปี" : "รวมช่วงที่เลือก"}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -205,7 +228,7 @@ export function PatientCategoryCard({
                     {data.months.map((m, idx) => (
                       <td
                         key={m.label}
-                        className={`stat-figure-num px-1.5 py-1.5 text-right ${monthIndex === idx ? "bg-primary/10" : ""}`}
+                        className={`stat-figure-num px-1.5 py-1.5 text-right ${selectedIdx != null && selectedIdx.includes(idx) ? "bg-primary/10" : ""}`}
                       >
                         {m.hasData ? (
                           <>
@@ -218,22 +241,24 @@ export function PatientCategoryCard({
                       </td>
                     ))}
                     <td className="stat-figure-num px-2 py-1.5 text-right">
-                      <div className="font-semibold text-base-content">{fmt(data.yearTotals[c.key])}</div>
-                      <div className="text-[10px] text-base-content/40">{pct(data.yearTotals[c.key], data.yearTotal).toFixed(1)}%</div>
+                      <div className="font-semibold text-base-content">{fmt(scopeCounts[c.key])}</div>
+                      <div className="text-[10px] text-base-content/40">{pct(scopeCounts[c.key], scopeTotal).toFixed(1)}%</div>
                     </td>
                   </tr>
                 ))}
                 <tr className="font-semibold">
-                  <td className="sticky left-0 z-10 bg-base-200 px-2 py-1.5 text-base-content">รวมทั้งหมด</td>
+                  <td className="sticky left-0 z-10 bg-base-200 px-2 py-1.5 text-base-content">
+                    ผู้รับบริการทั้งหมด{filteredCats ? " (ทุกประเภท)" : ""}
+                  </td>
                   {data.months.map((m, idx) => (
                     <td
                       key={m.label}
-                      className={`stat-figure-num px-1.5 py-1.5 text-right text-base-content ${monthIndex === idx ? "bg-primary/10" : ""}`}
+                      className={`stat-figure-num px-1.5 py-1.5 text-right text-base-content ${selectedIdx != null && selectedIdx.includes(idx) ? "bg-primary/10" : ""}`}
                     >
                       {m.hasData ? fmt(m.total) : <span className="font-normal text-base-content/25">-</span>}
                     </td>
                   ))}
-                  <td className="stat-figure-num px-2 py-1.5 text-right text-base-content">{fmt(data.yearTotal)}</td>
+                  <td className="stat-figure-num px-2 py-1.5 text-right text-base-content">{fmt(scopeTotal)}</td>
                 </tr>
               </tbody>
             </table>

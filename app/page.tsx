@@ -20,9 +20,14 @@ import type { ServicePointRow } from "@/lib/sheets-service-points";
 import type { KpiIndicatorConfigRow } from "@/lib/sheets-kpi-indicators";
 import { pointMeta } from "@/lib/point-meta";
 import {
-  RecordRow, availableFiscalYears, fiscalYearByPoint, fiscalYearByType,
-  fiscalMonthLabels, yearlyTrend, monthByPoint, monthByType,
+  RecordRow, availableFiscalYears, fiscalMonthLabels, yearlyTrend,
 } from "@/lib/aggregate";
+import {
+  type PeriodType, type RangeKey, yearMonths, availableYears, rangeIndices, rangeOptions, periodLabel,
+  filterRecords, pointMonthly, typeTotals, sameMonthsLastYear,
+} from "@/lib/service-filter";
+import type { PatientCategoryKey } from "@/lib/patient-categories";
+import { CategoryPicker } from "@/components/CategoryPicker";
 import {
   TatRecordRow, availableTatYears, tatSeriesByPoint, tatMonthLabels, tatByPointForMonth,
 } from "@/lib/aggregate-tat";
@@ -179,6 +184,16 @@ function comparedMonthsLabel(months: number[]): string {
   return months.length === 1 ? abbr(months[0]) : `${abbr(months[0])}–${abbr(months[months.length - 1])}`;
 }
 
+/** A small caption above one filter control. */
+function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[11px] font-medium text-base-content/45">{label}</span>
+      {children}
+    </div>
+  );
+}
+
 function Skeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -213,10 +228,18 @@ export default function DashboardPage() {
   const [records, setRecords] = useState<RecordRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Fiscal year: drives the ผู้รับบริการ section in "ปีงบประมาณ" mode AND the
+  // per-indicator KPI trend charts further down (which are fiscal-only).
   const [fiscalYear, setFiscalYear] = useState<number | null>(null);
-  // "all" = whole fiscal year (default); a number 0..11 = one fiscal-order
-  // month index (0 = ต.ค., 11 = ก.ย.) to drill the dashboard into.
-  const [monthIndex, setMonthIndex] = useState<number | "all">("all");
+  // ผู้รับบริการ-section filters (lib/service-filter.ts). They only affect
+  // that section; TAT and the quality indicators keep their own selectors.
+  const [periodType, setPeriodType] = useState<PeriodType>("fiscal");
+  const [calYear, setCalYear] = useState<number | null>(null);
+  const [range, setRange] = useState<RangeKey>("all");
+  const [customFrom, setCustomFrom] = useState(0);
+  const [customTo, setCustomTo] = useState(11);
+  const [pointFilter, setPointFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<PatientCategoryKey[] | "all">("all");
   const [showYoY, setShowYoY] = useState(true);
 
   const [tatRecords, setTatRecords] = useState<TatRecordRow[]>([]);
@@ -305,16 +328,8 @@ export default function DashboardPage() {
   }, [pmMachines, kpiIndicatorConfig]);
 
   const years = useMemo(() => availableFiscalYears(records), [records]);
-  const byPoint = useMemo(
-    () => (fiscalYear ? fiscalYearByPoint(records, fiscalYear, SERVICE_POINTS) : []),
-    [records, fiscalYear, SERVICE_POINTS]
-  );
   const monthLabels = fiscalMonthLabels();
   const trend = useMemo(() => yearlyTrend(records), [records]);
-  // The trend row for the fiscal year the selector is on (the hero card's
-  // scope) — not blindly the newest year, so picking an older year shows
-  // that year's own YoY change.
-  const selectedTrend = trend.find((t) => t.year === fiscalYear) ?? trend[trend.length - 1];
   const incompleteTrend = trend.find((t) => !t.complete) ?? null;
 
   // Simple linear forecast for next fiscal year's total, fit only on
@@ -336,29 +351,59 @@ export default function DashboardPage() {
     return { ...next, pctChange };
   }, [trend, records]);
 
-  // The actual (ปี, เดือน) the month selector points at, in fiscal order —
-  // null when the selector is on "ทั้งปี" (whole fiscal year).
-  const selectedMonthPair = useMemo(() => {
-    if (!fiscalYear || monthIndex === "all") return null;
-    return fiscalYearMonths(fiscalYear)[monthIndex] ?? null;
-  }, [fiscalYear, monthIndex]);
-
-  // Per-จุดบริการ totals scoped to the selector: whole fiscal year by
-  // default, or a single month when one is picked.
-  const displayByPoint = useMemo(() => {
-    if (selectedMonthPair) return monthByPoint(records, selectedMonthPair.year, selectedMonthPair.month, SERVICE_POINTS);
-    return byPoint;
-  }, [records, selectedMonthPair, byPoint, SERVICE_POINTS]);
-
+  // ── ผู้รับบริการ section: apply the filters ──
+  const calYears = useMemo(() => availableYears(records, "calendar"), [records]);
+  const svcYears = periodType === "fiscal" ? years : calYears;
+  const svcYear = periodType === "fiscal" ? fiscalYear : (calYear ?? calYears[calYears.length - 1] ?? null);
+  // The 12 months of the chosen fiscal/calendar year, in display order.
+  const months12 = useMemo(() => (svcYear != null ? yearMonths(periodType, svcYear) : []), [periodType, svcYear]);
+  // Which of those 12 the ช่วงเวลา filter selects.
+  const selIdx = useMemo(() => rangeIndices(range, customFrom, customTo), [range, customFrom, customTo]);
+  const selMonths = useMemo(() => selIdx.map((i) => months12[i]).filter((m) => m != null), [selIdx, months12]);
+  const isSelected = (i: number) => range === "all" || selIdx.includes(i);
+  // Point + category filtered rows (everything in this section reads these).
+  const svcRecords = useMemo(
+    () => filterRecords(records, pointFilter, categoryFilter),
+    [records, pointFilter, categoryFilter]
+  );
+  // Point-filtered only: the base for the ประเภท card's "% of all patients".
+  const pointRecords = useMemo(() => filterRecords(records, pointFilter, "all"), [records, pointFilter]);
+  const shownPoints = useMemo(
+    () => (pointFilter === "all" ? SERVICE_POINTS : [pointFilter]),
+    [pointFilter, SERVICE_POINTS]
+  );
+  const pointSeries = useMemo(() => pointMonthly(svcRecords, months12, shownPoints), [svcRecords, months12, shownPoints]);
+  const displayByPoint = pointSeries.map((p) => ({
+    point: p.point,
+    total: selIdx.reduce((s, i) => s + (p.values[i] ?? 0), 0),
+  }));
   const grandTotal = displayByPoint.reduce((s, p) => s + p.total, 0);
+  const filterSuffix = [
+    pointFilter !== "all" ? pointFilter : null,
+    categoryFilter !== "all" ? `${categoryFilter.length} ประเภท` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const yearLabel = periodType === "fiscal" ? `ปีงบ ${svcYear}` : `ปีปฏิทิน ${svcYear}`;
+  const scopeLabel =
+    (svcYear != null ? periodLabel(periodType, svcYear, range, customFrom, customTo) : "") +
+    (filterSuffix ? ` · ${filterSuffix}` : "");
+  // Same months one year earlier, only months entered in both years.
+  const heroChange = useMemo(() => sameMonthsLastYear(svcRecords, records, selMonths), [svcRecords, records, selMonths]);
+  const filtersActive =
+    periodType !== "fiscal" || range !== "all" || pointFilter !== "all" || categoryFilter !== "all";
+  function resetFilters() {
+    setPeriodType("fiscal");
+    setRange("all");
+    setCustomFrom(0);
+    setCustomTo(11);
+    setPointFilter("all");
+    setCategoryFilter("all");
+  }
 
-  const scopeLabel = selectedMonthPair
-    ? `เดือน ${MONTH_NAMES_TH[selectedMonthPair.month - 1]} ${selectedMonthPair.year}`
-    : `ปีงบ ${fiscalYear}`;
-
-  const monthlyChartData = monthLabels.map((label, i) => {
-    const row: Record<string, string | number> = { month: label };
-    for (const p of byPoint) row[p.point] = p.values[i];
+  const monthlyChartData = months12.map((m, i) => {
+    const row: Record<string, string | number> = { month: m.label };
+    for (const p of pointSeries) row[p.point] = p.values[i];
     return row;
   });
 
@@ -648,32 +693,101 @@ export default function DashboardPage() {
 
       {years.length > 0 && (
         <>
-          <div id="sec-service" className="flex scroll-mt-24 flex-wrap items-center gap-3">
-            <span className="text-xs font-medium uppercase tracking-wide text-base-content/40">
-              ปีงบประมาณ
-            </span>
-            <select
-              className="select select-sm select-bordered w-28 bg-base-200/60"
-              value={fiscalYear ?? ""}
-              onChange={(e) => setFiscalYear(Number(e.target.value))}
-            >
-              {years.map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-            <span className="text-xs font-medium uppercase tracking-wide text-base-content/40">
-              เดือน
-            </span>
-            <select
-              className="select select-sm select-bordered w-32 bg-base-200/60"
-              value={monthIndex}
-              onChange={(e) => setMonthIndex(e.target.value === "all" ? "all" : Number(e.target.value))}
-            >
-              <option value="all">ทั้งปี</option>
-              {monthLabels.map((label, i) => (
-                <option key={label} value={i}>{label}</option>
-              ))}
-            </select>
+          {/* Filters for the ผู้รับบริการ section (not TAT / quality indicators) */}
+          <div id="sec-service" className="flex scroll-mt-24 flex-wrap items-end gap-x-3 gap-y-3">
+            <FilterField label="มุมมองปี">
+              <div className="join" role="group" aria-label="มุมมองปี">
+                {(["fiscal", "calendar"] as const).map((pt) => (
+                  <button
+                    key={pt}
+                    type="button"
+                    aria-pressed={periodType === pt}
+                    onClick={() => {
+                      if (pt === periodType) return;
+                      setPeriodType(pt);
+                      // Month positions mean different months in each mode.
+                      setRange("all");
+                      setCustomFrom(0);
+                      setCustomTo(11);
+                    }}
+                    className={`btn join-item btn-sm ${periodType === pt ? "btn-primary" : "btn-ghost bg-base-200/60"}`}
+                  >
+                    {pt === "fiscal" ? "ปีงบประมาณ" : "ปีปฏิทิน"}
+                  </button>
+                ))}
+              </div>
+            </FilterField>
+            <FilterField label={periodType === "fiscal" ? "ปีงบ" : "ปี พ.ศ."}>
+              <select
+                className="select select-sm select-bordered w-24 bg-base-200/60"
+                value={svcYear ?? ""}
+                onChange={(e) =>
+                  periodType === "fiscal" ? setFiscalYear(Number(e.target.value)) : setCalYear(Number(e.target.value))
+                }
+              >
+                {svcYears.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </FilterField>
+            <FilterField label="ช่วงเวลา">
+              <select
+                className="select select-sm select-bordered w-auto max-w-[15rem] bg-base-200/60"
+                value={range}
+                onChange={(e) => setRange(e.target.value as RangeKey)}
+              >
+                {svcYear != null &&
+                  rangeOptions(periodType, svcYear).map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+              </select>
+            </FilterField>
+            {range === "custom" && (
+              <>
+                <FilterField label="จากเดือน">
+                  <select
+                    className="select select-sm select-bordered w-28 bg-base-200/60"
+                    value={customFrom}
+                    onChange={(e) => setCustomFrom(Number(e.target.value))}
+                  >
+                    {months12.map((m, i) => (
+                      <option key={i} value={i}>{m.label} {m.year}</option>
+                    ))}
+                  </select>
+                </FilterField>
+                <FilterField label="ถึงเดือน">
+                  <select
+                    className="select select-sm select-bordered w-28 bg-base-200/60"
+                    value={customTo}
+                    onChange={(e) => setCustomTo(Number(e.target.value))}
+                  >
+                    {months12.map((m, i) => (
+                      <option key={i} value={i}>{m.label} {m.year}</option>
+                    ))}
+                  </select>
+                </FilterField>
+              </>
+            )}
+            <FilterField label="จุดบริการ">
+              <select
+                className="select select-sm select-bordered w-auto max-w-[14rem] bg-base-200/60"
+                value={pointFilter}
+                onChange={(e) => setPointFilter(e.target.value)}
+              >
+                <option value="all">ทุกจุดบริการ</option>
+                {SERVICE_POINTS.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            </FilterField>
+            <FilterField label="ประเภทผู้รับบริการ">
+              <CategoryPicker value={categoryFilter} onChange={setCategoryFilter} />
+            </FilterField>
+            {filtersActive && (
+              <button type="button" onClick={resetFilters} className="btn btn-ghost btn-sm text-base-content/60">
+                ล้างตัวกรอง
+              </button>
+            )}
           </div>
 
           {/* Bento grid */}
@@ -685,35 +799,33 @@ export default function DashboardPage() {
                   <div>
                     <div className="flex items-center gap-2 text-xs font-medium text-base-content/50">
                       <Users size={14} />
-                      จำนวนผู้รับบริการทั้งหมด · {scopeLabel}
+                      จำนวนผู้รับบริการ · {scopeLabel}
                     </div>
                     <div className="mt-3 text-4xl font-bold text-base-content sm:text-5xl">
                       <CountUp value={grandTotal} />
                       <span className="ml-2 text-base font-medium text-base-content/40">คน</span>
                     </div>
                   </div>
-                  {!selectedMonthPair && selectedTrend?.pctChange != null && (
+                  {heroChange && (
                     <div className="flex flex-col items-end gap-1">
                       <div
                         className={`badge gap-1 border-0 ${
-                          selectedTrend.pctChange >= 0
+                          heroChange.pctChange >= 0
                             ? "bg-success/15 text-success"
                             : "bg-error/15 text-error"
                         }`}
-                        title={`เทียบกับช่วงเดียวกันของปีงบ ${selectedTrend.year - 1}`}
+                        title="เทียบกับเดือนเดียวกันของปีก่อน เฉพาะเดือนที่มีข้อมูลทั้งสองปี"
                       >
-                        {selectedTrend.pctChange >= 0 ? (
+                        {heroChange.pctChange >= 0 ? (
                           <TrendingUp size={13} />
                         ) : (
                           <TrendingDown size={13} />
                         )}
-                        {Math.abs(selectedTrend.pctChange).toFixed(1)}%
+                        {Math.abs(heroChange.pctChange).toFixed(1)}%
                       </div>
-                      {!selectedTrend.complete && (
-                        <span className="text-right text-[10px] text-base-content/45">
-                          เทียบ {comparedMonthsLabel(selectedTrend.comparedMonths)} ปีงบ {selectedTrend.year - 1}
-                        </span>
-                      )}
+                      <span className="text-right text-[10px] text-base-content/45">
+                        เทียบ {heroChange.compared} เดือนเดียวกันของปีก่อน
+                      </span>
                     </div>
                   )}
                 </div>
@@ -750,7 +862,7 @@ export default function DashboardPage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/40">
-                  แนวโน้ม 6 ปีล่าสุด
+                  แนวโน้ม 6 ปีล่าสุด{pointFilter !== "all" || categoryFilter !== "all" ? " (ทุกจุดบริการ ทุกประเภท)" : ""}
                   {incompleteTrend && (
                     <span className="rounded-field bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning">
                       ปีงบ {incompleteTrend.year} ยังไม่ครบ ({incompleteTrend.filledMonths}/12 เดือน) · เส้นประ
@@ -795,7 +907,9 @@ export default function DashboardPage() {
               <h2 className="text-sm font-semibold text-base-content">
                 จำนวนผู้รับบริการรายเดือน แยกตามจุดบริการ
               </h2>
-              <span className="text-xs text-base-content/40">ปีงบ {fiscalYear}</span>
+              <span className="text-xs text-base-content/40">
+                {yearLabel}{filterSuffix ? ` · ${filterSuffix}` : ""}
+              </span>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={monthlyChartData} barCategoryGap={18} barSize={24}>
@@ -804,16 +918,16 @@ export default function DashboardPage() {
                 <YAxis tick={{ fontSize: 12, fill: chartColors.axisTick }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={chartColors.tooltip} cursor={{ fill: chartColors.cursor }} />
                 <Legend wrapperStyle={{ fontSize: 12, color: chartColors.axisTick }} />
-                {SERVICE_POINTS.map((p, pIdx) => (
+                {shownPoints.map((p, pIdx) => (
                   <Bar
                     key={p}
                     dataKey={p}
                     stackId="a"
                     fill={pointMeta(p).color}
-                    radius={pIdx === SERVICE_POINTS.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                    radius={pIdx === shownPoints.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
                   >
                     {monthlyChartData.map((_, i) => (
-                      <Cell key={i} fillOpacity={monthIndex === "all" || monthIndex === i ? 1 : 0.25} />
+                      <Cell key={i} fillOpacity={isSelected(i) ? 1 : 0.25} />
                     ))}
                   </Bar>
                 ))}
@@ -823,10 +937,8 @@ export default function DashboardPage() {
 
           {/* Share by ประเภทผู้รับบริการ, per จุดบริการ — ranked bar list */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {SERVICE_POINTS.map((point, idx) => {
-              const data = selectedMonthPair
-                ? monthByType(records, selectedMonthPair.year, selectedMonthPair.month, point)
-                : fiscalYearByType(records, fiscalYear!, point);
+            {shownPoints.map((point, idx) => {
+              const data = typeTotals(svcRecords, selMonths, point);
               if (!data.length) return null;
               const meta = pointMeta(point);
               return (
@@ -845,11 +957,14 @@ export default function DashboardPage() {
           </div>
 
           {/* ประเภทผู้รับบริการ — 10 groups across all จุดบริการ, by month */}
-          {fiscalYear != null && (
+          {svcYear != null && (
             <PatientCategoryCard
-              records={records}
-              fiscalYear={fiscalYear}
-              monthIndex={monthIndex}
+              records={pointRecords}
+              months={months12}
+              selectedIdx={range === "all" ? null : selIdx}
+              categories={categoryFilter}
+              yearLabel={yearLabel}
+              scopeLabel={scopeLabel}
               colors={chartColors}
               i={8}
             />
