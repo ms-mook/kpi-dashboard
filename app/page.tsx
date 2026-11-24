@@ -27,7 +27,7 @@ import {
   TatRecordRow, availableTatYears, tatSeriesByPoint, tatMonthLabels, tatByPointForMonth,
 } from "@/lib/aggregate-tat";
 import {
-  KpiRecordRow, kpiMonthResult, kpiYearTrend, kpiStatus, availableKpiYears,
+  KpiRecordRow, kpiMonthResult, kpiYearTrend, kpiStatus, availableKpiYears, ratioPairCountTrend,
 } from "@/lib/aggregate-kpi";
 import { CountUp } from "@/components/CountUp";
 import { BentoCard } from "@/components/BentoCard";
@@ -36,6 +36,7 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { LiveClock } from "@/components/LiveClock";
 import { ExecutiveSummary } from "@/components/ExecutiveSummary";
 import { SectionNav, type SectionNavItem } from "@/components/SectionNav";
+import { ComplaintCountChart, type ComplaintCountRow } from "@/components/ComplaintCountChart";
 import { linearForecastNextYear } from "@/lib/forecast";
 import { useTheme } from "@/lib/useTheme";
 
@@ -517,7 +518,14 @@ export default function DashboardPage() {
       const prev = kpiYearTrend(indicator, kpiRecords, records, fiscalYear - 1);
       const hasPrevData = prev.some((d) => d.pct != null);
       const data = current.map((d, i) => ({ ...d, pctPrev: prev[i]?.pct ?? null }));
-      return { indicator, data, hasPrevData };
+      // Complaints chart as monthly counts rather than "% resolved".
+      let complaintCounts: ComplaintCountRow[] | null = null;
+      if (indicator.id === "complaint" && indicator.kind === "ratio_pair") {
+        const cur = ratioPairCountTrend(indicator, kpiRecords, fiscalYear);
+        const prv = ratioPairCountTrend(indicator, kpiRecords, fiscalYear - 1);
+        complaintCounts = cur.map((d, i) => ({ ...d, totalPrev: prv[i]?.total ?? null }));
+      }
+      return { indicator, data, hasPrevData, complaintCounts };
     });
   }, [kpiRecords, records, fiscalYear, kpiIndicators]);
 
@@ -1123,8 +1131,10 @@ export default function DashboardPage() {
             </label>
           </div>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {kpiTrendByIndicator.map(({ indicator, data, hasPrevData }, idx) => {
-              const showPrev = showYoY && hasPrevData;
+            {kpiTrendByIndicator.map(({ indicator, data, hasPrevData, complaintCounts }, idx) => {
+              const showPrev = complaintCounts
+                ? showYoY && complaintCounts.some((d) => d.totalPrev != null)
+                : showYoY && hasPrevData;
               const incidentMax = indicator.kind === "incident" ? indicator.maxPerYear : undefined;
               const latestIncident = [...data].reverse().find((d) => d.count != null);
               const axis = zoomedPercentAxis(
@@ -1134,14 +1144,24 @@ export default function DashboardPage() {
               return (
               <BentoCard key={indicator.id} i={23 + idx} className="!p-5">
                 <div className="mb-1 flex items-baseline justify-between gap-2">
-                  <h3 className="text-xs font-semibold text-base-content/70">{indicator.shortName ?? indicator.name}</h3>
-                  {indicator.target && !axis.targetInRange && (
+                  <h3 className="text-xs font-semibold text-base-content/70">
+                    {complaintCounts ? "จำนวนเรื่องร้องเรียนรายเดือน" : (indicator.shortName ?? indicator.name)}
+                  </h3>
+                  {!complaintCounts && indicator.target && !axis.targetInRange && (
                     <span className="shrink-0 text-[10px] text-base-content/35">
                       เป้าหมาย {indicator.target.value}%
                     </span>
                   )}
                 </div>
-                {indicator.kind === "incident" ? (
+                {complaintCounts ? (
+                  <ComplaintCountChart
+                    data={complaintCounts}
+                    showPrev={showPrev}
+                    label={showPrev ? `ปีงบ ${fiscalYear}` : "จำนวนเรื่องร้องเรียน"}
+                    prevLabel={`ปีงบ ${(fiscalYear ?? 0) - 1}`}
+                    colors={chartColors}
+                  />
+                ) : indicator.kind === "incident" ? (
                   <div className="flex h-[180px] flex-col justify-center gap-2">
                     <div className="grid grid-cols-12 gap-1.5">
                       {data.map((d, i) => (

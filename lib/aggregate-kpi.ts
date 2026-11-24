@@ -189,6 +189,22 @@ export function availableKpiYears(records: KpiRecordRow[]): number[] {
   return Array.from(set).sort((a, b) => a - b);
 }
 
+/** Fiscal-year (Oct..Sep) raw counts for a ratio_pair indicator, e.g.
+ * complaints: `total` = complaints received that month, `resolved` = how
+ * many of them were resolved. null = month not entered yet (vs a real 0).
+ * Charting these counts reads far better than the % does: a month with no
+ * complaints at all otherwise shows as "100% resolved", same as a month
+ * where every complaint was handled. */
+export function ratioPairCountTrend(indicator: KpiIndicator, kpiRecords: KpiRecordRow[], fiscalYear: number) {
+  const labels = [MONTH_ABBR_TH[9], MONTH_ABBR_TH[10], MONTH_ABBR_TH[11], ...MONTH_ABBR_TH.slice(0, 9)];
+  return fiscalYearMonths(fiscalYear).map(({ year, month }, i) => {
+    if (indicator.kind !== "ratio_pair") return { month: labels[i], total: null, resolved: null };
+    const total = getNumber(kpiRecords, year, month, indicator.id, indicator.denominator.key);
+    const resolved = getNumber(kpiRecords, year, month, indicator.id, indicator.numerator.key);
+    return { month: labels[i], total, resolved };
+  });
+}
+
 /** Fiscal-year (Oct..Sep) trend of one indicator's headline % for charting. */
 export function kpiYearTrend(
   indicator: KpiIndicator,
