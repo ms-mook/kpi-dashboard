@@ -114,7 +114,7 @@ function tatAvg(records: TatRecordRow[], months: YM[], point: string, stage: str
 }
 
 function targetText(ind: KpiIndicator): string {
-  if (ind.kind === "incident") return "0 ครั้ง";
+  if (ind.kind === "incident") return ind.maxPerYear != null ? `ไม่เกิน ${ind.maxPerYear} ครั้ง/ปี` : "0 ครั้ง";
   if (ind.kind === "pm") return "100%";
   if (!ind.target) return "-";
   return `${ind.target.direction === "min" ? "ไม่เกิน" : "ไม่น้อยกว่า"} ${ind.target.value}%`;
@@ -210,16 +210,23 @@ export function buildReportData(input: {
     }
     const head = rows[0];
     if (!head) continue;
+    // Incident indicators report the count itself ("N ครั้ง"), colored by
+    // PASS/FAIL — the count sub-row (rows[1]) carries the raw numbers.
+    const countRow = ind.kind === "incident" ? rows[1] : undefined;
+    const withUnit = (t: string | undefined) => (t == null || t === "-" || t === "" ? "-" : `${t} ครั้ง`);
     const monthly = head.cells.map((c, i) => {
       let st: Status = null;
-      if (ind.kind === "incident") st = c.status === "pass" || c.status === "fail" ? c.status : null;
-      else {
-        const res = kpiMonthResult(ind, kpiRecords, attendance, months[i].year, months[i].month);
-        st = res.note ? null : kpiStatus(ind, res);
+      if (ind.kind === "incident") {
+        st = c.status === "pass" || c.status === "fail" ? c.status : null;
+        return { text: countRow?.cells[i]?.text ?? "-", status: st };
       }
+      const res = kpiMonthResult(ind, kpiRecords, attendance, months[i].year, months[i].month);
+      st = res.note ? null : kpiStatus(ind, res);
       return { text: thStatus(c.text), status: st };
     });
-    const value = thStatus(annual ? head.total.text : head.cells[0]?.text ?? "-");
+    const value = countRow
+      ? withUnit(annual ? countRow.total.text : countRow.cells[0]?.text)
+      : thStatus(annual ? head.total.text : head.cells[0]?.text ?? "-");
     const status = annual
       ? ind.kind === "incident"
         ? head.total.status === "pass" || head.total.status === "fail"

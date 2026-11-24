@@ -1,6 +1,6 @@
 import { KpiIndicator } from "./constants";
 import { RecordRow, monthTotal } from "./aggregate";
-import { kpiMonthResult, getNumber, getBool, KpiRecordRow } from "./aggregate-kpi";
+import { kpiMonthResult, getNumber, getBool, KpiRecordRow, incidentStatus } from "./aggregate-kpi";
 
 // Shared row-building logic for the Excel-mirrored KPI table — used by both
 // the on-page KpiYearTable component and the server-side Excel export, so
@@ -273,11 +273,17 @@ export function buildIndicatorRows(
 
     case "incident": {
       const counts = months.map(({ year, month }) => getNumber(records, year, month, indicator.id, indicator.countField.key));
-      const statusCells = counts.map((c): Cell => {
-        if (c == null) return { text: "-" };
-        return c === 0
-          ? { text: "PASS", className: "text-success font-semibold", status: "pass" }
-          : { text: "FAIL", className: "text-error font-semibold", status: "fail" };
+      const statusCell = (s: "pass" | "fail" | null): Cell =>
+        s == null
+          ? { text: "-" }
+          : s === "pass"
+            ? { text: "PASS", className: "text-success font-semibold", status: "pass" }
+            : { text: "FAIL", className: "text-error font-semibold", status: "fail" };
+      // Per-month status comes from kpiMonthResult so a yearly ceiling
+      // (maxPerYear) is judged on the fiscal-year-to-date cumulative count.
+      const statusCells = months.map(({ year, month }) => {
+        const s = kpiMonthResult(indicator, records, attendance, year, month).status;
+        return statusCell(s === "pass" || s === "fail" ? s : null);
       });
       const countSum = sumOrNull(counts);
       rows.push({
@@ -286,12 +292,7 @@ export function buildIndicatorRows(
         desc: indicator.criteria,
         bold: true,
         cells: statusCells,
-        total:
-          countSum == null
-            ? { text: "-" }
-            : countSum === 0
-              ? { text: "PASS", className: "text-success font-semibold", status: "pass" }
-              : { text: "FAIL", className: "text-error font-semibold", status: "fail" },
+        total: statusCell(incidentStatus(indicator.maxPerYear, countSum, countSum)),
         valueKind: "status",
       });
       rows.push({

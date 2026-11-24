@@ -307,7 +307,7 @@ export function KpiEntryForm() {
                       จัดการเครื่อง
                     </button>
                   )}
-                  {(result.pct != null || result.note) && (
+                  {(result.pct != null || result.note || result.display) && (
                     <div
                       className={`rounded-field px-2.5 py-1 text-sm font-bold ${
                         result.note
@@ -320,7 +320,7 @@ export function KpiEntryForm() {
                                 : "bg-primary/10 text-primary")
                       }`}
                     >
-                      {result.note ?? `${result.pct!.toFixed(indicator.decimals ?? 1)}%`}
+                      {result.note ?? result.display ?? `${result.pct!.toFixed(indicator.decimals ?? 1)}%`}
                     </div>
                   )}
                   </div>
@@ -468,6 +468,11 @@ export function KpiEntryForm() {
                           }`}
                         >
                           {result.status === "pass" ? "PASS" : "FAIL"}
+                        </span>
+                      )}
+                      {indicator.maxPerYear != null && result.ytdCount != null && (
+                        <span className="text-xs text-base-content/50">
+                          สะสมปีงบ (ต.ค.–เดือนนี้) {result.ytdCount}/{indicator.maxPerYear} ครั้ง
                         </span>
                       )}
                     </div>

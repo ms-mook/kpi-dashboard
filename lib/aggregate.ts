@@ -133,23 +133,59 @@ export function yearlyTrend(records: RecordRow[]) {
   // legacy row already claimed the earlier calendar year number.
   const liveFiscalYears = availableFiscalYears(records);
 
-  const rows: { year: number; months: number[]; total: number }[] = legacy.map((y) => ({
-    year: y.year,
-    months: y.months,
-    total: y.months.reduce((a, b) => a + b, 0),
-  }));
+  // `byMonth` maps month-of-year (1..12) → that month's total, only for
+  // months that actually have data. Keyed by month number rather than array
+  // position because the two sources are ordered differently: legacy rows
+  // are calendar Jan..Dec, live rows are fiscal Oct..Sep.
+  type TrendRow = { year: number; months: number[]; total: number; byMonth: Map<number, number> };
 
+  const rows: TrendRow[] = legacy.map((y) => {
+    const byMonth = new Map<number, number>();
+    y.months.forEach((v, i) => {
+      if (v > 0) byMonth.set(i + 1, v);
+    });
+    return { year: y.year, months: y.months, total: y.months.reduce((a, b) => a + b, 0), byMonth };
+  });
+
+  const present = new Set(records.map((r) => `${r.year}-${r.month}`));
   for (const fiscalYear of liveFiscalYears) {
     if (rows.some((r) => r.year === fiscalYear)) continue;
-    const months = fiscalYearMonths(fiscalYear).map(({ year, month }) => monthTotal(records, year, month));
-    rows.push({ year: fiscalYear, months, total: months.reduce((a, b) => a + b, 0) });
+    const fyMonths = fiscalYearMonths(fiscalYear);
+    const months = fyMonths.map(({ year, month }) => monthTotal(records, year, month));
+    const byMonth = new Map<number, number>();
+    fyMonths.forEach(({ year, month }, i) => {
+      if (present.has(`${year}-${month}`)) byMonth.set(month, months[i]);
+    });
+    rows.push({ year: fiscalYear, months, total: months.reduce((a, b) => a + b, 0), byMonth });
   }
 
   rows.sort((a, b) => a.year - b.year);
 
   return rows.map((row, i) => {
-    const prev = i > 0 ? rows[i - 1].total : 0;
-    const pctChange = prev > 0 ? ((row.total - prev) / prev) * 100 : null;
-    return { ...row, pctChange };
+    const filledMonths = row.byMonth.size;
+    const complete = filledMonths >= 12;
+    const prevRow = i > 0 ? rows[i - 1] : null;
+    // Like-for-like: only months that have data in BOTH this year and the
+    // year before, matched by month-of-year. A year still in progress (say
+    // just ต.ค.) is then compared against last year's ต.ค. only — not
+    // against last year's full 12-month total, which used to show a huge
+    // fake "drop" every October.
+    let pctChange: number | null = null;
+    const comparedMonths: number[] = [];
+    if (prevRow) {
+      let cur = 0;
+      let prev = 0;
+      for (const [m, v] of row.byMonth) {
+        const p = prevRow.byMonth.get(m);
+        if (p == null) continue;
+        cur += v;
+        prev += p;
+        comparedMonths.push(m);
+      }
+      pctChange = prev > 0 ? ((cur - prev) / prev) * 100 : null;
+    }
+    const { byMonth: _byMonth, ...rest } = row;
+    void _byMonth;
+    return { ...rest, pctChange, filledMonths, complete, comparedMonths };
   });
 }

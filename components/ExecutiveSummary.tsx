@@ -73,7 +73,9 @@ export function ExecutiveSummary({
           // "up" is only good news when the target is a floor to clear; for
           // a ceiling-style target ("min", e.g. rejection rate) a falling
           // line is the improvement.
-          const goodDirection = indicator.target?.direction === "min" ? "down" : "up";
+          // Incident counts: fewer is always better.
+          const goodDirection =
+            indicator.kind === "incident" || indicator.target?.direction === "min" ? "down" : "up";
           const trendIsGood = trend != null && trend === goodDirection;
           return (
             <div
@@ -97,7 +99,9 @@ export function ExecutiveSummary({
                   }
                   title={result.note ?? undefined}
                 >
-                  {result.note ?? (result.pct == null ? "-" : `${result.pct.toFixed(indicator.decimals ?? 1)}%`)}
+                  {result.note ??
+                    result.display ??
+                    (result.pct == null ? "-" : `${result.pct.toFixed(indicator.decimals ?? 1)}%`)}
                 </span>
                 {trend && (
                   <span className={trendIsGood ? "text-success" : "text-error"} title={trend === "up" ? "เพิ่มขึ้นจากเดือนก่อน" : "ลดลงจากเดือนก่อน"}>
@@ -105,6 +109,11 @@ export function ExecutiveSummary({
                   </span>
                 )}
               </div>
+              {indicator.kind === "incident" && indicator.maxPerYear != null && result.ytdCount != null && (
+                <div className="mt-0.5 text-[10px] text-base-content/45">
+                  สะสมปีงบ {result.ytdCount}/{indicator.maxPerYear} ครั้ง
+                </div>
+              )}
               {status ? (
                 <div
                   className={`mt-1.5 flex w-fit items-center gap-1 rounded-field px-1.5 py-0.5 text-[10px] font-semibold ${

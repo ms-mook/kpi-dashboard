@@ -1,4 +1,4 @@
-import { KpiIndicator, fiscalYearMonths, MONTH_ABBR_TH } from "./constants";
+import { KpiIndicator, fiscalYearMonths, fiscalYearOf, MONTH_ABBR_TH } from "./constants";
 import { RecordRow, monthTotal } from "./aggregate";
 
 export type KpiRecordRow = {
@@ -42,7 +42,49 @@ export type KpiMonthResult = {
    * instead of a bare "100%" so a zero-complaints month doesn't read the
    * same as an all-resolved one. */
   note?: string;
+  /** Headline text to show instead of a % (e.g. "1 ครั้ง" for an incident
+   * count). Unlike `note` this is a real value, styled as one. */
+  display?: string;
+  /** incident only: this month's count, and the fiscal-year-to-date sum
+   * (Oct..this month) when the indicator has a yearly ceiling. */
+  count?: number | null;
+  ytdCount?: number | null;
 };
+
+/** Fiscal-year-to-date incident count: Oct of (year, month)'s fiscal year
+ * through (year, month) itself, summing only months that have a value. */
+export function incidentYtdCount(
+  kpiRecords: KpiRecordRow[],
+  indicatorId: string,
+  countKey: string,
+  year: number,
+  month: number
+): number | null {
+  const fy = fiscalYearOf(year, month);
+  let sum = 0;
+  let any = false;
+  for (const m of fiscalYearMonths(fy)) {
+    const v = getNumber(kpiRecords, m.year, m.month, indicatorId, countKey);
+    if (v != null) {
+      sum += v;
+      any = true;
+    }
+    if (m.year === year && m.month === month) break;
+  }
+  return any ? sum : null;
+}
+
+/** PASS/FAIL for an incident indicator: cumulative-vs-ceiling when it has
+ * `maxPerYear`, otherwise "any incident this month = FAIL". */
+export function incidentStatus(
+  maxPerYear: number | undefined,
+  count: number | null,
+  ytdCount: number | null
+): "pass" | "fail" | null {
+  if (count == null) return null;
+  if (maxPerYear != null) return (ytdCount ?? count) <= maxPerYear ? "pass" : "fail";
+  return count === 0 ? "pass" : "fail";
+}
 
 /** Compute one indicator's result for a single (year, month), given the KPI
  * sheet rows and (for the two auto/pre-filled denominators) the attendance
@@ -105,12 +147,20 @@ export function kpiMonthResult(
     case "incident": {
       const count = getNumber(kpiRecords, year, month, indicator.id, indicator.countField.key);
       const reviewDone = getBool(kpiRecords, year, month, indicator.id, indicator.checkboxField.key);
-      const status: "pass" | "fail" | null = count == null ? null : count === 0 ? "pass" : "fail";
+      const ytdCount =
+        indicator.maxPerYear != null && count != null
+          ? incidentYtdCount(kpiRecords, indicator.id, indicator.countField.key, year, month)
+          : null;
+      // A count, not a rate — there's no meaningful % here, so pct stays
+      // null and the UI shows `display` ("N ครั้ง") instead.
       return {
         indicator,
-        pct: count == null ? null : count === 0 ? 100 : 0,
-        status,
+        pct: null,
+        status: incidentStatus(indicator.maxPerYear, count, ytdCount),
         detail: [{ label: indicator.checkboxField.label, pct: null, status: reviewDone ? "pass" : "pending" }],
+        display: count == null ? undefined : `${count} ครั้ง`,
+        count,
+        ytdCount,
       };
     }
   }
@@ -150,6 +200,6 @@ export function kpiYearTrend(
   const labels = [MONTH_ABBR_TH[9], MONTH_ABBR_TH[10], MONTH_ABBR_TH[11], ...MONTH_ABBR_TH.slice(0, 9)];
   return months.map(({ year, month }, i) => {
     const result = kpiMonthResult(indicator, kpiRecords, attendanceRecords, year, month);
-    return { month: labels[i], pct: result.pct, status: result.status };
+    return { month: labels[i], pct: result.pct, status: result.status, count: result.count ?? null, ytdCount: result.ytdCount ?? null };
   });
 }

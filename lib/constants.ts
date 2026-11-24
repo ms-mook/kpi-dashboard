@@ -151,9 +151,13 @@ export type KpiIndicator =
       criteria: string;
       decimals?: number;
       target?: KpiTarget;
-      kind: "incident"; // incident count (PASS if 0) + a yes/no checkbox
+      kind: "incident"; // incident count + a yes/no checkbox
       countField: KpiField;
       checkboxField: KpiField;
+      /** When set, PASS/FAIL is judged on the fiscal-year-to-date cumulative
+       * count (Oct..viewed month) against this ceiling, e.g. "ไม่เกิน 2 ครั้ง
+       * ต่อปี". When unset, any incident in the month is a FAIL. */
+      maxPerYear?: number;
     };
 
 export const KPI_INDICATORS: KpiIndicator[] = [
@@ -219,6 +223,7 @@ export const KPI_INDICATORS: KpiIndicator[] = [
     kind: "incident",
     countField: { key: "safety_incident_count", label: "จำนวนรายงานอุบัติเหตุทางการแพทย์" },
     checkboxField: { key: "safety_review_done", label: "รอบทบทวนสำเร็จ" },
+    maxPerYear: 2,
   },
 ];
 

@@ -8,12 +8,12 @@ import {
 } from "recharts";
 import {
   KeyRound, TrendingUp, TrendingDown, Users, CalendarClock, Droplet, Timer, ShieldCheck,
-  CheckCircle2, XCircle, Wrench, Smile, MessageSquareWarning,
+  XCircle, Wrench, Smile, MessageSquareWarning,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
   SERVICE_POINTS as DEFAULT_POINTS, TAT_STAGES, TAT_STAGE_META, withPmGroups, withKpiIndicatorConfig,
-  MONTH_NAMES_TH, fiscalYearMonths, fiscalYearMonthsFilled,
+  MONTH_NAMES_TH, MONTH_ABBR_TH, fiscalYearMonths, fiscalYearMonthsFilled,
 } from "@/lib/constants";
 import type { PmMachine } from "@/lib/sheets-pm-machines";
 import type { ServicePointRow } from "@/lib/sheets-service-points";
@@ -149,6 +149,33 @@ function zoomedPercentAxis(values: (number | null | undefined)[], target?: numbe
   return { domain: [loF, hiF] as [number, number], ticks, targetInRange };
 }
 
+type TrendPoint = { year: number; total: number; complete: boolean };
+
+/** Splits yearly totals into a solid "total" series (complete fiscal years)
+ * and a dashed "partialTotal" series for a year still in progress. The
+ * partial series also carries the previous complete year's value so the
+ * dashed segment starts exactly where the solid line ends. */
+function withPartialSeries(rows: TrendPoint[]) {
+  const out = rows.map((t) => ({
+    year: t.year,
+    total: t.complete ? t.total : (null as number | null),
+    partialTotal: t.complete ? (null as number | null) : t.total,
+  }));
+  out.forEach((r, i) => {
+    if (r.partialTotal != null && i > 0 && out[i - 1].total != null) {
+      out[i - 1].partialTotal = out[i - 1].total;
+    }
+  });
+  return out;
+}
+
+/** "ต.ค." / "ต.ค.–ธ.ค." for the months a like-for-like YoY compared. */
+function comparedMonthsLabel(months: number[]): string {
+  if (months.length === 0) return "";
+  const abbr = (m: number) => MONTH_ABBR_TH[m - 1];
+  return months.length === 1 ? abbr(months[0]) : `${abbr(months[0])}–${abbr(months[months.length - 1])}`;
+}
+
 function Skeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -281,7 +308,11 @@ export default function DashboardPage() {
   );
   const monthLabels = fiscalMonthLabels();
   const trend = useMemo(() => yearlyTrend(records), [records]);
-  const latestTrend = trend[trend.length - 1];
+  // The trend row for the fiscal year the selector is on (the hero card's
+  // scope) — not blindly the newest year, so picking an older year shows
+  // that year's own YoY change.
+  const selectedTrend = trend.find((t) => t.year === fiscalYear) ?? trend[trend.length - 1];
+  const incompleteTrend = trend.find((t) => !t.complete) ?? null;
 
   // Simple linear forecast for next fiscal year's total, fit only on
   // fiscal years whose 12 months are all filled in — the live-computed
@@ -328,17 +359,18 @@ export default function DashboardPage() {
     return row;
   });
 
-  const sparklineData = trend.slice(-6).map((t) => ({ year: t.year, total: t.total }));
+  // A fiscal year still in progress only has its year-to-date total, so it
+  // is drawn as a separate dashed "partialTotal" segment (bridged from the
+  // previous complete year) instead of extending the solid line — otherwise
+  // every October the line plunges as if service volume collapsed.
+  const sparklineData = useMemo(() => withPartialSeries(trend.slice(-6)), [trend]);
   // The forecast line is a second series so it can be dashed and colored
   // differently from the actual-totals line: "forecastTotal" is null for
   // every real year except the last one (so the dashed segment starts
   // exactly where the solid line ends) plus the forecast year itself.
   const trendChartData = useMemo(() => {
-    const rows: { year: string; total: number | null; forecastTotal: number | null }[] = trend.map((t) => ({
-      year: String(t.year),
-      total: t.total,
-      forecastTotal: null,
-    }));
+    const rows: { year: string; total: number | null; partialTotal: number | null; forecastTotal: number | null }[] =
+      withPartialSeries(trend).map((r) => ({ ...r, year: String(r.year), forecastTotal: null }));
     if (forecast) {
       const bridgeIdx = rows.findIndex((r) => r.year === String(forecast.year - 1));
       if (bridgeIdx >= 0) rows[bridgeIdx].forecastTotal = rows[bridgeIdx].total;
@@ -346,7 +378,7 @@ export default function DashboardPage() {
       if (existingIdx >= 0) {
         rows[existingIdx].forecastTotal = forecast.total;
       } else {
-        rows.push({ year: String(forecast.year), total: null, forecastTotal: forecast.total });
+        rows.push({ year: String(forecast.year), total: null, partialTotal: null, forecastTotal: forecast.total });
       }
     }
     return rows;
@@ -463,8 +495,11 @@ export default function DashboardPage() {
         : null;
       const status = kpiStatus(indicator, result);
       let trend: "up" | "down" | null = null;
-      if (result.pct != null && prevResult?.pct != null && result.pct !== prevResult.pct) {
-        trend = result.pct > prevResult.pct ? "up" : "down";
+      // Incidents carry a count instead of a %; compare whichever applies.
+      const cur = indicator.kind === "incident" ? result.count ?? null : result.pct;
+      const prev = indicator.kind === "incident" ? prevResult?.count ?? null : prevResult?.pct ?? null;
+      if (cur != null && prev != null && cur !== prev) {
+        trend = cur > prev ? "up" : "down";
       }
       return { indicator, result, status, trend };
     });
@@ -626,20 +661,28 @@ export default function DashboardPage() {
                       <span className="ml-2 text-base font-medium text-base-content/40">คน</span>
                     </div>
                   </div>
-                  {!selectedMonthPair && latestTrend?.pctChange != null && (
-                    <div
-                      className={`badge gap-1 border-0 ${
-                        latestTrend.pctChange >= 0
-                          ? "bg-success/15 text-success"
-                          : "bg-error/15 text-error"
-                      }`}
-                    >
-                      {latestTrend.pctChange >= 0 ? (
-                        <TrendingUp size={13} />
-                      ) : (
-                        <TrendingDown size={13} />
+                  {!selectedMonthPair && selectedTrend?.pctChange != null && (
+                    <div className="flex flex-col items-end gap-1">
+                      <div
+                        className={`badge gap-1 border-0 ${
+                          selectedTrend.pctChange >= 0
+                            ? "bg-success/15 text-success"
+                            : "bg-error/15 text-error"
+                        }`}
+                        title={`เทียบกับช่วงเดียวกันของปีงบ ${selectedTrend.year - 1}`}
+                      >
+                        {selectedTrend.pctChange >= 0 ? (
+                          <TrendingUp size={13} />
+                        ) : (
+                          <TrendingDown size={13} />
+                        )}
+                        {Math.abs(selectedTrend.pctChange).toFixed(1)}%
+                      </div>
+                      {!selectedTrend.complete && (
+                        <span className="text-right text-[10px] text-base-content/45">
+                          เทียบ {comparedMonthsLabel(selectedTrend.comparedMonths)} ปีงบ {selectedTrend.year - 1}
+                        </span>
                       )}
-                      {Math.abs(latestTrend.pctChange).toFixed(1)}%
                     </div>
                   )}
                 </div>
@@ -657,14 +700,32 @@ export default function DashboardPage() {
                       <Area
                         type="monotone"
                         dataKey="total"
+                        name="ยอดทั้งปี"
                         stroke="var(--color-opd)"
                         strokeWidth={2}
                         fill="url(#heroGrad)"
                       />
+                      <Area
+                        type="monotone"
+                        dataKey="partialTotal"
+                        name="ยอดสะสม (ปีงบยังไม่ครบ)"
+                        stroke="var(--color-opd)"
+                        strokeOpacity={0.55}
+                        strokeWidth={2}
+                        strokeDasharray="4 4"
+                        fill="none"
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="mt-1 text-xs text-base-content/40">แนวโน้ม 6 ปีล่าสุด</div>
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/40">
+                  แนวโน้ม 6 ปีล่าสุด
+                  {incompleteTrend && (
+                    <span className="rounded-field bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning">
+                      ปีงบ {incompleteTrend.year} ยังไม่ครบ ({incompleteTrend.filledMonths}/12 เดือน) · เส้นประ
+                    </span>
+                  )}
+                </div>
               </div>
             </BentoCard>
 
@@ -762,6 +823,11 @@ export default function DashboardPage() {
               <CalendarClock size={14} strokeWidth={2.2} />
             </span>
             <h2 className="text-sm font-semibold text-base-content">แนวโน้มยอดผู้รับบริการรายปี</h2>
+            {incompleteTrend && (
+              <span className="rounded-field bg-warning/15 px-2 py-0.5 text-[11px] font-medium text-warning">
+                ปีงบ {incompleteTrend.year} ยังไม่ครบ ({incompleteTrend.filledMonths}/12 เดือน)
+              </span>
+            )}
           </div>
           {forecast && (
             <span className="flex items-center gap-1.5 rounded-field bg-info/15 px-2.5 py-1 text-xs font-medium text-info">
@@ -779,10 +845,10 @@ export default function DashboardPage() {
               contentStyle={chartColors.tooltip}
               formatter={(value, name) => [
                 value == null ? "-" : `${Number(value).toLocaleString()} คน`,
-                name === "forecastTotal" ? "พยากรณ์" : "ยอดจริง",
+                name,
               ]}
             />
-            {forecast && <Legend wrapperStyle={{ fontSize: 11, color: chartColors.axisTick }} />}
+            {(forecast || incompleteTrend) && <Legend wrapperStyle={{ fontSize: 11, color: chartColors.axisTick }} />}
             <Line
               type="monotone"
               dataKey="total"
@@ -792,6 +858,19 @@ export default function DashboardPage() {
               dot={{ r: 3, fill: "var(--color-opd)", strokeWidth: 0 }}
               activeDot={{ r: 5 }}
             />
+            {incompleteTrend && (
+              <Line
+                type="monotone"
+                dataKey="partialTotal"
+                name="ยอดสะสม (ปีงบยังไม่ครบ)"
+                stroke="var(--color-opd)"
+                strokeOpacity={0.6}
+                strokeWidth={2}
+                strokeDasharray="4 4"
+                dot={{ r: 3, fill: "var(--color-opd)", strokeWidth: 0 }}
+                connectNulls
+              />
+            )}
             {forecast && (
               <Line
                 type="monotone"
@@ -818,7 +897,14 @@ export default function DashboardPage() {
             <tbody>
               {trend.map((t) => (
                 <tr key={t.year} className="border-b border-base-content/5">
-                  <td className="py-1.5 text-base-content/70">{t.year}</td>
+                  <td className="py-1.5 text-base-content/70">
+                    {t.year}
+                    {!t.complete && (
+                      <span className="ml-1.5 rounded-field bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning">
+                        ยังไม่ครบ {t.filledMonths}/12 เดือน
+                      </span>
+                    )}
+                  </td>
                   <td className="stat-figure-num py-1.5 text-right text-base-content/90">
                     {t.total.toLocaleString()}
                   </td>
@@ -828,6 +914,11 @@ export default function DashboardPage() {
                     }`}
                   >
                     {t.pctChange == null ? "-" : `${t.pctChange.toFixed(1)}%`}
+                    {!t.complete && t.pctChange != null && (
+                      <div className="text-[10px] text-base-content/40">
+                        เทียบ {comparedMonthsLabel(t.comparedMonths)} ปีก่อน
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -1011,6 +1102,8 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {kpiTrendByIndicator.map(({ indicator, data, hasPrevData }, idx) => {
               const showPrev = showYoY && hasPrevData;
+              const incidentMax = indicator.kind === "incident" ? indicator.maxPerYear : undefined;
+              const latestIncident = [...data].reverse().find((d) => d.count != null);
               const axis = zoomedPercentAxis(
                 showPrev ? data.flatMap((d) => [d.pct, d.pctPrev]) : data.map((d) => d.pct),
                 indicator.target?.value
@@ -1031,8 +1124,10 @@ export default function DashboardPage() {
                       {data.map((d, i) => (
                         <div
                           key={i}
-                          title={`${d.month}: ${d.status === "pass" ? "PASS" : d.status === "fail" ? "FAIL" : "ไม่มีข้อมูล"}`}
-                          className={`flex h-9 items-center justify-center rounded-field ${
+                          title={`${d.month}: ${d.count == null ? "ไม่มีข้อมูล" : `${d.count} ครั้ง`}${
+                            d.ytdCount != null ? ` (สะสม ${d.ytdCount} ครั้ง)` : ""
+                          } · ${d.status === "pass" ? "PASS" : d.status === "fail" ? "FAIL" : "-"}`}
+                          className={`flex h-9 items-center justify-center rounded-field text-xs font-semibold ${
                             d.status === "pass"
                               ? "bg-success/15 text-success"
                               : d.status === "fail"
@@ -1040,13 +1135,7 @@ export default function DashboardPage() {
                                 : "bg-base-200/50 text-base-content/25"
                           }`}
                         >
-                          {d.status === "pass" ? (
-                            <CheckCircle2 size={14} />
-                          ) : d.status === "fail" ? (
-                            <XCircle size={14} />
-                          ) : (
-                            <span className="text-[10px]">–</span>
-                          )}
+                          {d.count == null ? <span className="text-[10px] font-normal">–</span> : d.count}
                         </div>
                       ))}
                     </div>
@@ -1055,6 +1144,13 @@ export default function DashboardPage() {
                         <span key={i} className="text-center text-[9px] text-base-content/35">{d.month}</span>
                       ))}
                     </div>
+                    {latestIncident && (
+                      <div className="text-center text-[11px] text-base-content/50">
+                        {incidentMax != null
+                          ? `สะสมปีงบ ${latestIncident.ytdCount ?? latestIncident.count}/${incidentMax} ครั้ง (เกณฑ์ไม่เกิน ${incidentMax} ครั้งต่อปี)`
+                          : "จำนวนครั้งต่อเดือน (เกณฑ์ 0 ครั้ง)"}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height={180}>
