@@ -177,7 +177,7 @@ export function AttendanceEntryForm() {
         <BentoCard i={0} className="!p-4">
           <div className="flex flex-wrap items-end gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-base-content/50">ปี พ.ศ.</label>
+              <label className="mb-1 block text-xs font-medium text-base-content/70">ปี พ.ศ.</label>
               <select
                 className="select select-bordered select-sm bg-base-200/60"
                 value={year}
@@ -189,7 +189,7 @@ export function AttendanceEntryForm() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-base-content/50">เดือน</label>
+              <label className="mb-1 block text-xs font-medium text-base-content/70">เดือน</label>
               <select
                 className="select select-bordered select-sm bg-base-200/60"
                 value={month}
@@ -200,14 +200,14 @@ export function AttendanceEntryForm() {
                 ))}
               </select>
             </div>
-            <div className="badge badge-ghost border-base-content/10 text-xs text-base-content/50">
+            <div className="badge badge-ghost border-base-content/10 text-xs text-base-content/70">
               ปีงบประมาณ {selectedFiscalYear}
             </div>
             <CompletenessBadge filled={monthsFilled} />
-            {loading && <Loader2 size={16} className="animate-spin text-base-content/40" />}
+            {loading && <Loader2 size={16} className="animate-spin text-base-content/65" />}
             <button
               onClick={() => setAdminOpen(true)}
-              className="btn btn-ghost btn-xs ml-auto gap-1 text-base-content/50"
+              className="btn btn-ghost btn-xs ml-auto gap-1 text-base-content/70"
             >
               <Settings2 size={13} />
               จัดการจุดบริการ
@@ -239,7 +239,7 @@ export function AttendanceEntryForm() {
                     const k = keyOf(p.point, p.type);
                     return (
                       <div key={k} className="flex items-center justify-between gap-3">
-                        <label className="text-sm text-base-content/70">{p.type}</label>
+                        <label className="text-sm text-base-content/80">{p.type}</label>
                         <input
                           type="number"
                           min={0}
@@ -260,8 +260,8 @@ export function AttendanceEntryForm() {
         </div>
 
         <div className="glass-panel sticky bottom-4 flex items-center justify-between rounded-box p-4">
-          <div className="flex items-center gap-2 text-sm text-base-content/70">
-            <Users size={15} className="text-base-content/40" />
+          <div className="flex items-center gap-2 text-sm text-base-content/80">
+            <Users size={15} className="text-base-content/65" />
             ยอดรวมเดือนนี้:{" "}
             <span className="stat-figure-num font-bold text-base-content">{total.toLocaleString()}</span> คน
           </div>

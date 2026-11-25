@@ -40,7 +40,7 @@ export function LiveClock({ className = "" }: { className?: string }) {
 
   const { date, time } = formatThai(now);
   return (
-    <div className={`flex items-center gap-1.5 text-xs text-base-content/45 ${className}`}>
+    <div className={`flex items-center gap-1.5 text-xs text-base-content/65 ${className}`}>
       <CalendarDays size={13} />
       <span>{date}</span>
       <span className="text-base-content/25">·</span>

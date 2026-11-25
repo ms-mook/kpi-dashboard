@@ -248,7 +248,7 @@ export function KpiEntryForm() {
         <BentoCard i={0} className="!p-4">
           <div className="flex flex-wrap items-end gap-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-base-content/50">ปี พ.ศ.</label>
+              <label className="mb-1 block text-xs font-medium text-base-content/70">ปี พ.ศ.</label>
               <select
                 className="select select-bordered select-sm bg-base-200/60"
                 value={year}
@@ -260,7 +260,7 @@ export function KpiEntryForm() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-base-content/50">เดือน</label>
+              <label className="mb-1 block text-xs font-medium text-base-content/70">เดือน</label>
               <select
                 className="select select-bordered select-sm bg-base-200/60"
                 value={month}
@@ -271,14 +271,14 @@ export function KpiEntryForm() {
                 ))}
               </select>
             </div>
-            <div className="badge badge-ghost border-base-content/10 text-xs text-base-content/50">
+            <div className="badge badge-ghost border-base-content/10 text-xs text-base-content/70">
               ปีงบประมาณ {selectedFiscalYear}
             </div>
             <CompletenessBadge filled={monthsFilled} />
-            {loading && <Loader2 size={16} className="animate-spin text-base-content/40" />}
+            {loading && <Loader2 size={16} className="animate-spin text-base-content/65" />}
             <button
               onClick={() => setIndicatorAdminOpen(true)}
-              className="btn btn-ghost btn-xs ml-auto gap-1 text-base-content/50"
+              className="btn btn-ghost btn-xs ml-auto gap-1 text-base-content/70"
             >
               <ListChecks size={13} />
               จัดการตัวชี้วัด
@@ -307,7 +307,7 @@ export function KpiEntryForm() {
                     </span>
                     <div>
                       <div className="text-sm font-semibold text-base-content">{indicator.shortName ?? indicator.name}</div>
-                      <div className="mt-0.5 flex items-start gap-1.5 text-[11px] text-base-content/40">
+                      <div className="mt-0.5 flex items-start gap-1.5 text-[13px] text-base-content/65">
                         <Info size={12} className="mt-0.5 shrink-0" />
                         {indicator.criteria}
                       </div>
@@ -317,7 +317,7 @@ export function KpiEntryForm() {
                   {indicator.kind === "pm" && (
                     <button
                       onClick={() => setPmAdminOpen(true)}
-                      className="btn btn-ghost btn-xs gap-1 text-base-content/50"
+                      className="btn btn-ghost btn-xs gap-1 text-base-content/70"
                     >
                       <Settings2 size={13} />
                       จัดการเครื่อง
@@ -327,7 +327,7 @@ export function KpiEntryForm() {
                     <div
                       className={`rounded-field px-2.5 py-1 text-sm font-bold ${
                         result.note
-                          ? "bg-base-content/5 text-base-content/50"
+                          ? "bg-base-content/5 text-base-content/70"
                           : "stat-figure-num " +
                             (result.status === "fail"
                               ? "bg-error/15 text-error"
@@ -364,7 +364,7 @@ export function KpiEntryForm() {
                             value={rawValue(indicator.id, indicator.directField.key, "")}
                             onChange={(v) => setField(indicator.id, indicator.directField!.key, v)}
                           />
-                          <p className="max-w-sm text-[11px] text-base-content/35">
+                          <p className="max-w-sm text-[13px] text-base-content/65">
                             ใช้เมื่อเดือนนั้นไม่มีข้อมูลนับรายเป็นจำนวนคน (เหมือนไฟล์ต้นฉบับที่บางเดือนกรอก % ตรง ๆ) —
                             ถ้ากรอกจำนวนทั้ง 2 ช่องด้านล่างไว้แล้ว ระบบจะใช้ค่าที่คำนวณจากจำนวนก่อนเสมอ
                           </p>
@@ -382,7 +382,7 @@ export function KpiEntryForm() {
                           onChange={(v) => setField(indicator.id, indicator.denominator.key, v)}
                         />
                       </div>
-                      <p className="text-[11px] text-base-content/35">
+                      <p className="text-[13px] text-base-content/65">
                         ค่าตั้งต้นดึงจากฐานข้อมูลที่ 1 ({attendanceTotal.toLocaleString()} คน) แต่แก้ไขได้ —
                         เพราะตัวเลขในไฟล์เดิมของตัวชี้วัดนี้ไม่ตรงกับยอดรวมผู้รับบริการทุกเดือนเป๊ะเหมือนตัวชี้วัดข้อ 1
                       </p>
@@ -423,13 +423,13 @@ export function KpiEntryForm() {
                             <div className="mb-2 flex items-center justify-between">
                               <span className="text-xs font-semibold text-base-content/80">{g.label}</span>
                               {groupResult?.pct != null && (
-                                <span className="stat-figure-num text-xs font-bold text-base-content/70">
+                                <span className="stat-figure-num text-xs font-bold text-base-content/80">
                                   {groupResult.pct.toFixed(indicator.decimals ?? 1)}%
                                 </span>
                               )}
-                              {pending && <span className="badge badge-ghost text-[10px]">รอทำสัญญา</span>}
+                              {pending && <span className="badge badge-ghost text-[12px]">รอทำสัญญา</span>}
                             </div>
-                            <label className="mb-2 flex items-center gap-2 text-[11px] text-base-content/50">
+                            <label className="mb-2 flex items-center gap-2 text-[13px] text-base-content/70">
                               <input
                                 type="checkbox"
                                 className="checkbox checkbox-xs"
@@ -465,7 +465,7 @@ export function KpiEntryForm() {
                         value={rawValue(indicator.id, indicator.countField.key, "0")}
                         onChange={(v) => setField(indicator.id, indicator.countField.key, v)}
                       />
-                      <label className="flex items-center gap-2 text-sm text-base-content/70">
+                      <label className="flex items-center gap-2 text-sm text-base-content/80">
                         <input
                           type="checkbox"
                           className="checkbox checkbox-sm"
@@ -474,7 +474,7 @@ export function KpiEntryForm() {
                             setField(indicator.id, indicator.checkboxField.key, e.target.checked ? "TRUE" : "FALSE")
                           }
                         />
-                        <ShieldCheck size={14} className="text-base-content/40" />
+                        <ShieldCheck size={14} className="text-base-content/65" />
                         {indicator.checkboxField.label}
                       </label>
                       {result.status && (
@@ -487,7 +487,7 @@ export function KpiEntryForm() {
                         </span>
                       )}
                       {indicator.maxPerYear != null && result.ytdCount != null && (
-                        <span className="text-xs text-base-content/50">
+                        <span className="text-xs text-base-content/70">
                           สะสมปีงบ (ต.ค.–เดือนนี้) {result.ytdCount}/{indicator.maxPerYear} ครั้ง
                         </span>
                       )}
@@ -523,7 +523,7 @@ export function KpiEntryForm() {
               มี {issues.length} รายการที่ตัวตั้งมากกว่าตัวหาร แก้ก่อนบันทึก
             </div>
           ) : (
-            <div className="text-sm text-base-content/60">กรอกครบ {KPI_INDICATORS.length} ตัวชี้วัดแล้วกดบันทึก</div>
+            <div className="text-sm text-base-content/75">กรอกครบ {KPI_INDICATORS.length} ตัวชี้วัดแล้วกดบันทึก</div>
           )}
           <button
             onClick={handleSubmit}
@@ -557,7 +557,7 @@ function NumberField({
 }: { label: string; value: string; onChange: (v: string) => void; unit?: string; compact?: boolean }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-base-content/50">{label}</label>
+      <label className="mb-1 block text-xs text-base-content/70">{label}</label>
       <div className="flex items-center gap-1.5">
         <input
           // A plain text input (not type="number") so typing is never locked —
@@ -573,7 +573,7 @@ function NumberField({
             if (v === "" || /^\d*\.?\d*$/.test(v)) onChange(v);
           }}
         />
-        {unit && <span className="text-xs text-base-content/40">{unit}</span>}
+        {unit && <span className="text-xs text-base-content/65">{unit}</span>}
       </div>
     </div>
   );
@@ -582,8 +582,8 @@ function NumberField({
 function ReadonlyField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-base-content/50">{label}</label>
-      <div className="input input-sm w-32 cursor-not-allowed items-center bg-base-200/30 text-right text-base-content/50">
+      <label className="mb-1 block text-xs text-base-content/70">{label}</label>
+      <div className="input input-sm w-32 cursor-not-allowed items-center bg-base-200/30 text-right text-base-content/70">
         {value}
       </div>
     </div>

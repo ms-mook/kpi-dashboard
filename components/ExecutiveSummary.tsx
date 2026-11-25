@@ -49,7 +49,7 @@ export function ExecutiveSummary({
             <ShieldCheck size={14} strokeWidth={2.2} />
           </span>
           <h2 className="text-sm font-semibold text-base-content">สรุปภาพรวมตัวชี้วัดคุณภาพ</h2>
-          <span className="text-xs text-base-content/40">· {monthLabel}</span>
+          <span className="text-xs text-base-content/65">· {monthLabel}</span>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
           {controls}
@@ -82,7 +82,7 @@ export function ExecutiveSummary({
               key={indicator.id}
               className="rounded-field border border-base-content/8 bg-base-200/30 p-3"
             >
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-base-content/50">
+              <div className="flex items-center gap-1.5 text-[13px] font-medium text-base-content/70">
                 <span style={{ color: accent }}>
                   <Icon size={12} strokeWidth={2.2} />
                 </span>
@@ -94,7 +94,7 @@ export function ExecutiveSummary({
                 <span
                   className={
                     result.note
-                      ? "line-clamp-1 text-xs font-medium text-base-content/60"
+                      ? "line-clamp-1 text-xs font-medium text-base-content/75"
                       : "stat-figure-num text-lg font-bold text-base-content"
                   }
                   title={result.note ?? undefined}
@@ -110,13 +110,13 @@ export function ExecutiveSummary({
                 )}
               </div>
               {indicator.kind === "incident" && indicator.maxPerYear != null && result.ytdCount != null && (
-                <div className="mt-0.5 text-[10px] text-base-content/45">
+                <div className="mt-0.5 text-[12px] text-base-content/65">
                   สะสมปีงบ {result.ytdCount}/{indicator.maxPerYear} ครั้ง
                 </div>
               )}
               {status ? (
                 <div
-                  className={`mt-1.5 flex w-fit items-center gap-1 rounded-field px-1.5 py-0.5 text-[10px] font-semibold ${
+                  className={`mt-1.5 flex w-fit items-center gap-1 rounded-field px-1.5 py-0.5 text-[12px] font-semibold ${
                     status === "pass" ? "bg-success/15 text-success" : "bg-error/15 text-error"
                   }`}
                 >
@@ -124,7 +124,7 @@ export function ExecutiveSummary({
                   {status === "pass" ? "PASS" : "FAIL"}
                 </div>
               ) : (
-                <div className="mt-1.5 text-[10px] text-base-content/30">ไม่มีข้อมูล</div>
+                <div className="mt-1.5 text-[12px] text-base-content/30">ไม่มีข้อมูล</div>
               )}
             </div>
           );

@@ -98,10 +98,10 @@ export function SectionNav({ items }: { items: SectionNavItem[] }) {
               data-sec={id}
               onClick={(e) => go(e, id)}
               aria-current={on ? "location" : undefined}
-              className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-field px-3 py-2 text-[13px] font-medium transition-colors sm:text-sm ${
+              className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-field px-3 py-2 text-[14px] font-medium transition-colors sm:text-sm ${
                 on
                   ? "bg-primary/15 text-primary"
-                  : "text-base-content/60 hover:bg-base-content/5 hover:text-base-content"
+                  : "text-base-content/75 hover:bg-base-content/5 hover:text-base-content"
               }`}
             >
               <Icon size={15} strokeWidth={2.2} aria-hidden="true" />

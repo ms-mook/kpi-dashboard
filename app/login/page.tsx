@@ -61,17 +61,17 @@ function LoginForm() {
           </span>
           <div>
             <h1 className="text-base font-semibold text-base-content">เข้าสู่ระบบกรอกข้อมูล</h1>
-            <p className="mt-1 text-xs text-base-content/50">
+            <p className="mt-1 text-xs text-base-content/70">
               หน่วยเจาะเลือด · รพ.ศรีนครินทร์
             </p>
           </div>
         </div>
 
-        <label className="mb-1.5 block text-xs font-medium text-base-content/50">รหัสผ่าน</label>
+        <label className="mb-1.5 block text-xs font-medium text-base-content/70">รหัสผ่าน</label>
         <div className="relative">
           <KeyRound
             size={16}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base-content/65"
           />
           <input
             autoFocus
@@ -93,7 +93,7 @@ function LoginForm() {
               e.preventDefault();
               setShowPassword(true);
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 select-none text-base-content/40 hover:text-base-content/70"
+            className="absolute right-3 top-1/2 -translate-y-1/2 select-none text-base-content/65 hover:text-base-content/80"
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>

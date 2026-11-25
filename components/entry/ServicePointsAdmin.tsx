@@ -146,24 +146,24 @@ export function ServicePointsAdmin({
       <div className="modal-box max-w-2xl">
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Settings2 size={16} className="text-base-content/50" />
+            <Settings2 size={16} className="text-base-content/70" />
             <h3 className="text-sm font-semibold text-base-content">จัดการจุดบริการ</h3>
           </div>
           <button onClick={onClose} aria-label="ปิด" className="btn btn-ghost btn-xs btn-circle">
             <X size={14} />
           </button>
         </div>
-        <p className="mb-4 text-[11px] text-base-content/40">
+        <p className="mb-4 text-[13px] text-base-content/65">
           ใช้ร่วมกันทั้งฟอร์ม &quot;จำนวนผู้รับบริการ&quot; และ &quot;TAT&quot; — เพิ่ม/ปิดใช้งานจุดบริการ (ห้อง) และประเภทผู้รับบริการย่อยในแต่ละจุดได้เอง
           <br />
-          <strong className="text-base-content/50">หมายเหตุการแก้ไขชื่อ:</strong> การแก้ชื่อมีผลกับข้อมูลที่กรอกใหม่เท่านั้น
+          <strong className="text-base-content/70">หมายเหตุการแก้ไขชื่อ:</strong> การแก้ชื่อมีผลกับข้อมูลที่กรอกใหม่เท่านั้น
           ข้อมูลเดือนเก่าที่เคยบันทึกด้วยชื่อเดิมจะยังอยู่ภายใต้ชื่อเดิมใน Google Sheet ไม่ถูกเปลี่ยนตาม
         </p>
 
         {error && <StatusBanner type="error" message={error} className="mb-3" />}
 
         {loading ? (
-          <div className="flex items-center justify-center py-8 text-base-content/40">
+          <div className="flex items-center justify-center py-8 text-base-content/65">
             <Loader2 size={20} className="animate-spin" />
           </div>
         ) : (
@@ -186,14 +186,14 @@ export function ServicePointsAdmin({
                       onClick={() => removeDraftPoint(pi)}
                       aria-label="ลบจุดนี้"
                       title="ลบจุดนี้ (ยังไม่บันทึก)"
-                      className="btn btn-ghost btn-xs btn-circle text-base-content/40 hover:text-error"
+                      className="btn btn-ghost btn-xs btn-circle text-base-content/65 hover:text-error"
                     >
                       <Trash2 size={13} />
                     </button>
                   ) : (
                     <button
                       onClick={() => updatePoint(pi, { active: !p.active })}
-                      className={`btn btn-xs gap-1 ${p.active ? "btn-ghost text-base-content/50" : "btn-ghost text-success"}`}
+                      className={`btn btn-xs gap-1 ${p.active ? "btn-ghost text-base-content/70" : "btn-ghost text-success"}`}
                       title={p.active ? "ปิดใช้งาน" : "เปิดใช้งานอีกครั้ง"}
                     >
                       {p.active ? <Trash2 size={13} /> : <RotateCcw size={13} />}
@@ -217,14 +217,14 @@ export function ServicePointsAdmin({
                           onClick={() => removeDraftType(pi, ti)}
                           aria-label="ลบประเภทนี้"
                           title="ลบประเภทนี้ (ยังไม่บันทึก)"
-                          className="btn btn-ghost btn-xs btn-circle text-base-content/40 hover:text-error"
+                          className="btn btn-ghost btn-xs btn-circle text-base-content/65 hover:text-error"
                         >
                           <Trash2 size={12} />
                         </button>
                       ) : (
                         <button
                           onClick={() => updateType(pi, ti, { active: !t.active })}
-                          className={`btn btn-xs gap-1 ${t.active ? "btn-ghost text-base-content/50" : "btn-ghost text-success"}`}
+                          className={`btn btn-xs gap-1 ${t.active ? "btn-ghost text-base-content/70" : "btn-ghost text-success"}`}
                           title={t.active ? "ปิดใช้งาน" : "เปิดใช้งานอีกครั้ง"}
                         >
                           {t.active ? <Trash2 size={12} /> : <RotateCcw size={12} />}
@@ -235,7 +235,7 @@ export function ServicePointsAdmin({
                   ))}
                   <button
                     onClick={() => addType(pi)}
-                    className="btn btn-ghost btn-xs gap-1.5 text-base-content/50"
+                    className="btn btn-ghost btn-xs gap-1.5 text-base-content/70"
                   >
                     <Plus size={12} />
                     เพิ่มประเภทผู้รับบริการ
@@ -244,7 +244,7 @@ export function ServicePointsAdmin({
               </div>
             ))}
 
-            <button onClick={addPoint} className="btn btn-ghost btn-sm gap-1.5 text-base-content/60">
+            <button onClick={addPoint} className="btn btn-ghost btn-sm gap-1.5 text-base-content/75">
               <Plus size={14} />
               เพิ่มจุดบริการใหม่
             </button>

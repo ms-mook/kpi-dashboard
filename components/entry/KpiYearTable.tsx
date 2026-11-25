@@ -46,13 +46,13 @@ export function KpiYearTable({
     <BentoCard i={0} className="!p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Table2 size={16} className="text-base-content/40" />
+          <Table2 size={16} className="text-base-content/65" />
           <h2 className="text-sm font-semibold text-base-content">สรุปตัวชี้วัดคุณภาพหน่วยเจาะเลือดเก็บสิ่งส่งตรวจและ POCT</h2>
         </div>
         <div className="flex items-center gap-2">
           <a
             href={`/api/kpi/export?year=${selectedYear}`}
-            className="btn btn-sm btn-outline gap-1.5 border-base-content/15 text-base-content/70 hover:border-primary hover:text-primary"
+            className="btn btn-sm btn-outline gap-1.5 border-base-content/15 text-base-content/80 hover:border-primary hover:text-primary"
             title="ดาวน์โหลดตารางนี้เป็นไฟล์ Excel (.xlsx) โครงสร้างเดียวกับไฟล์ต้นฉบับ"
           >
             <FileDown size={14} />
@@ -73,7 +73,7 @@ export function KpiYearTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1700px] text-xs">
           <thead>
-            <tr className="border-b border-base-content/10 text-base-content/50">
+            <tr className="border-b border-base-content/10 text-base-content/70">
               <th className="sticky left-0 z-10 w-10 bg-base-100/90 py-2 pr-2 text-center font-medium backdrop-blur-sm">
                 ลำดับที่
               </th>
@@ -122,7 +122,7 @@ export function KpiYearTable({
                     {rowIdx === 0 && (
                       <td
                         rowSpan={rows.length}
-                        className="sticky left-0 z-10 bg-base-100/90 py-1.5 pr-2 text-center align-top text-base-content/40 backdrop-blur-sm"
+                        className="sticky left-0 z-10 bg-base-100/90 py-1.5 pr-2 text-center align-top text-base-content/65 backdrop-blur-sm"
                       >
                         {idx}
                       </td>
@@ -130,13 +130,13 @@ export function KpiYearTable({
                     {nameCell}
                     <td
                       className={`max-w-[220px] py-1.5 pr-3 ${
-                        row.bold ? "text-base-content/70" : "pl-4 text-base-content/45"
+                        row.bold ? "text-base-content/80" : "pl-4 text-base-content/65"
                       }`}
                     >
                       {row.desc}
                     </td>
                     {row.cells.map((cell, i) => (
-                      <td key={i} className={`stat-figure-num px-2 py-1.5 text-right ${cell.className ?? "text-base-content/70"}`}>
+                      <td key={i} className={`stat-figure-num px-2 py-1.5 text-right ${cell.className ?? "text-base-content/80"}`}>
                         {cell.text}
                       </td>
                     ))}
@@ -150,7 +150,7 @@ export function KpiYearTable({
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-[11px] text-base-content/35">
+      <p className="mt-3 text-[13px] text-base-content/65">
         &quot;-&quot; หมายถึงยังไม่มีข้อมูลเดือนนั้น · รวม = ผลรวม/ค่าเฉลี่ยถ่วงน้ำหนักทั้งปีงบประมาณ
       </p>
     </BentoCard>

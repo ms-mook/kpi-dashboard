@@ -37,7 +37,7 @@ export function StatusBanner({
       <Icon size={18} className="mt-0.5 shrink-0" strokeWidth={2.2} />
       <div className="min-w-0 flex-1">
         {title && <div className="font-semibold">{title}</div>}
-        <div className={title ? "mt-0.5 text-[13px] opacity-90" : ""}>{message}</div>
+        <div className={title ? "mt-0.5 text-[14px] opacity-90" : ""}>{message}</div>
       </div>
       {onDismiss && (
         <button

@@ -49,12 +49,12 @@ export function ComplaintCountChart({
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={data} barCategoryGap="28%" margin={{ top: 14, right: 4, bottom: 0, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} vertical={false} />
-          <XAxis dataKey="month" tick={{ fontSize: 11, fill: colors.axisTick }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="month" tick={{ fontSize: 13, fill: colors.axisTick }} axisLine={false} tickLine={false} />
           <YAxis
             allowDecimals={false}
             domain={[0, max]}
             width={28}
-            tick={{ fontSize: 11, fill: colors.axisTick }}
+            tick={{ fontSize: 13, fill: colors.axisTick }}
             axisLine={false}
             tickLine={false}
           />
@@ -74,7 +74,7 @@ export function ComplaintCountChart({
               return [text, name];
             }}
           />
-          {showPrev && <Legend wrapperStyle={{ fontSize: 10, color: colors.axisTick }} />}
+          {showPrev && <Legend wrapperStyle={{ fontSize: 12, color: colors.axisTick }} />}
           {showPrev && (
             <Bar dataKey="totalPrev" name={prevLabel} fill={colors.axisTick} fillOpacity={0.35} radius={[4, 4, 0, 0]} />
           )}
@@ -92,13 +92,13 @@ export function ComplaintCountChart({
             <LabelList
               dataKey="total"
               position="top"
-              style={{ fontSize: 11, fontWeight: 600, fill: colors.axisTick }}
+              style={{ fontSize: 13, fontWeight: 600, fill: colors.axisTick }}
               formatter={(v: unknown) => (typeof v === "number" && v > 0 ? v : "")}
             />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <div className="mt-1 text-center text-[11px] text-base-content/50">
+      <div className="mt-1 text-center text-[13px] text-base-content/70">
         {entered.length === 0
           ? "ยังไม่มีข้อมูล"
           : yearTotal === 0

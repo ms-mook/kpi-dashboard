@@ -259,11 +259,38 @@
   --ambient-opacity: 0.09;
 }
 
+/* Readability: a step-larger type scale than Tailwind's default (only font
+   sizes change, not spacing), with Thai-friendly line heights so stacked
+   vowels and tone marks never touch the line above. Faint secondary text
+   was also raised to >= 65% opacity in the components (>= 4.5:1 contrast in
+   both light and dark themes). */
+@theme {
+  --text-xs: 0.8125rem; /* 13px (was 12) */
+  --text-xs--line-height: 1.6;
+  --text-sm: 0.9375rem; /* 15px (was 14) */
+  --text-sm--line-height: 1.6;
+  --text-base: 1.0625rem; /* 17px (was 16) */
+  --text-base--line-height: 1.65;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   font-feature-settings: "tnum" 1, "lnum" 1;
+  font-size: var(--text-base);
+  line-height: 1.65;
+}
+
+/* daisyUI controls carry their own (small) font sizes — one step up each.
+   In the components layer so an explicit text-* utility still wins. */
+@layer components {
+  /* base sizes first, size modifiers after (same specificity: later wins) */
+  .btn, .select, .input { font-size: 0.9375rem; }
+  .badge { font-size: 0.875rem; }
+  .btn-sm, .select-sm, .input-sm { font-size: 0.875rem; }
+  .btn-xs { font-size: 0.8125rem; }
+  .badge-sm { font-size: 0.8125rem; }
 }
 
 @supports (font-variation-settings: normal) {
