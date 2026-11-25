@@ -79,7 +79,7 @@ export function PatientCategoryCard({
             <Users size={14} strokeWidth={2.2} />
           </span>
           <h2 className="text-sm font-semibold text-base-content">ประเภทผู้รับบริการ</h2>
-          <span className="text-xs text-base-content/65">{scopeLabel}</span>
+          <span className="text-xs text-base-content/78">{scopeLabel}</span>
         </div>
         <div className="join" role="group" aria-label="แสดงกราฟรายเดือนเป็น">
           {(["count", "pct"] as const).map((m) => (
@@ -97,7 +97,7 @@ export function PatientCategoryCard({
       </div>
 
       {data.unmatched.length > 0 && (
-        <div className="mb-4 flex items-start gap-2 rounded-field bg-warning/10 px-3 py-2 text-xs text-base-content/80">
+        <div className="mb-4 flex items-start gap-2 rounded-field bg-warning/10 px-3 py-2 text-xs text-base-content/88">
           <AlertTriangle size={14} className="mt-0.5 shrink-0 text-warning" />
           <span>
             มีประเภทที่ยังไม่ได้จัดเข้ากลุ่ม จึงนับไว้ใน &quot;อื่น ๆ&quot;: {data.unmatched.join(", ")}
@@ -106,11 +106,11 @@ export function PatientCategoryCard({
       )}
 
       {scopeTotal === 0 ? (
-        <p className="py-6 text-center text-sm text-base-content/65">ยังไม่มีข้อมูลใน{scopeLabel}</p>
+        <p className="py-6 text-center text-sm text-base-content/78">ยังไม่มีข้อมูลใน{scopeLabel}</p>
       ) : (
         <>
           {/* 1 — compare the groups (ranked, one hue) */}
-          <h3 className="mb-2 text-xs font-medium text-base-content/70">
+          <h3 className="mb-2 text-xs font-medium text-base-content/82">
             เปรียบเทียบระหว่างประเภท ·{" "}
             {filteredCats
               ? `ประเภทที่เลือก ${fmt(shownTotal)} คน จากทั้งหมด ${fmt(scopeTotal)} คน`
@@ -121,8 +121,8 @@ export function PatientCategoryCard({
               const n = scopeCounts[c.key];
               return (
                 <div key={c.key} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3">
-                  <span className="truncate text-xs text-base-content/80" title={c.label}>{c.label}</span>
-                  <span className="stat-figure-num w-16 text-right text-xs text-base-content/80">{fmt(n)}</span>
+                  <span className="truncate text-xs text-base-content/88" title={c.label}>{c.label}</span>
+                  <span className="stat-figure-num w-16 text-right text-xs text-base-content/88">{fmt(n)}</span>
                   <span className="stat-figure-num w-12 text-right text-xs font-semibold text-base-content">
                     {pct(n, scopeTotal).toFixed(1)}%
                   </span>
@@ -135,10 +135,10 @@ export function PatientCategoryCard({
           </div>
 
           {/* 2 — month by month, one small chart per group */}
-          <h3 className="mb-1 mt-6 text-xs font-medium text-base-content/70">
+          <h3 className="mb-1 mt-6 text-xs font-medium text-base-content/82">
             รายเดือน ({mode === "count" ? "จำนวนคน" : "ร้อยละของผู้รับบริการทั้งหมดในเดือนนั้น"})
           </h3>
-          <p className="mb-3 text-[13px] text-base-content/65">
+          <p className="mb-3 text-[13px] text-base-content/78">
             แต่ละกราฟใช้สเกลของตัวเอง เพื่อให้เห็นการขึ้นลงของแต่ละประเภท · แตะแท่งเพื่อดูตัวเลข
           </p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
@@ -153,7 +153,7 @@ export function PatientCategoryCard({
               const headline = scopeCounts[c.key];
               return (
                 <div key={c.key} className="min-w-0 rounded-field border border-base-content/8 bg-base-200/30 p-2.5">
-                  <div className="line-clamp-2 min-h-[2rem] text-[13px] font-medium leading-4 text-base-content/75">
+                  <div className="line-clamp-2 min-h-[2rem] text-[13px] font-medium leading-4 text-base-content/85">
                     {c.label}
                   </div>
                   <div className="stat-figure-num mt-1 text-base font-bold text-base-content">
@@ -198,13 +198,13 @@ export function PatientCategoryCard({
           </div>
 
           {/* 3 — exact numbers */}
-          <h3 className="mb-2 mt-6 text-xs font-medium text-base-content/70">
+          <h3 className="mb-2 mt-6 text-xs font-medium text-base-content/82">
             ตารางจำนวน (ร้อยละ) · {yearLabel} · มีข้อมูล {filled}/12 เดือน
           </h3>
           <div className="overflow-x-auto rounded-field border border-base-content/8">
             <table className="w-full min-w-[960px] text-[13px]">
               <thead>
-                <tr className="border-b border-base-content/8 text-base-content/65">
+                <tr className="border-b border-base-content/8 text-base-content/78">
                   <th className="sticky left-0 z-10 bg-base-200 px-2 py-1.5 text-left font-medium">ประเภท</th>
                   {data.months.map((m, idx) => (
                     <th
@@ -214,7 +214,7 @@ export function PatientCategoryCard({
                       {m.label}
                     </th>
                   ))}
-                  <th className="px-2 py-1.5 text-right font-semibold text-base-content/80">
+                  <th className="px-2 py-1.5 text-right font-semibold text-base-content/88">
                     {selectedIdx == null ? "รวมทั้งปี" : "รวมช่วงที่เลือก"}
                   </th>
                 </tr>
@@ -222,7 +222,7 @@ export function PatientCategoryCard({
               <tbody>
                 {cats.map((c) => (
                   <tr key={c.key} className="border-b border-base-content/5">
-                    <td className="sticky left-0 z-10 max-w-[9rem] truncate bg-base-200 px-2 py-1.5 text-base-content/80" title={c.label}>
+                    <td className="sticky left-0 z-10 max-w-[9rem] truncate bg-base-200 px-2 py-1.5 text-base-content/88" title={c.label}>
                       {c.label}
                     </td>
                     {data.months.map((m, idx) => (
@@ -232,17 +232,17 @@ export function PatientCategoryCard({
                       >
                         {m.hasData ? (
                           <>
-                            <div className="text-base-content/85">{fmt(m.counts[c.key])}</div>
-                            <div className="text-[12px] text-base-content/65">{pct(m.counts[c.key], m.total).toFixed(1)}%</div>
+                            <div className="text-base-content/90">{fmt(m.counts[c.key])}</div>
+                            <div className="text-[12px] text-base-content/78">{pct(m.counts[c.key], m.total).toFixed(1)}%</div>
                           </>
                         ) : (
-                          <span className="text-base-content/25">-</span>
+                          <span className="text-base-content/40">-</span>
                         )}
                       </td>
                     ))}
                     <td className="stat-figure-num px-2 py-1.5 text-right">
                       <div className="font-semibold text-base-content">{fmt(scopeCounts[c.key])}</div>
-                      <div className="text-[12px] text-base-content/65">{pct(scopeCounts[c.key], scopeTotal).toFixed(1)}%</div>
+                      <div className="text-[12px] text-base-content/78">{pct(scopeCounts[c.key], scopeTotal).toFixed(1)}%</div>
                     </td>
                   </tr>
                 ))}
@@ -255,7 +255,7 @@ export function PatientCategoryCard({
                       key={m.label}
                       className={`stat-figure-num px-1.5 py-1.5 text-right text-base-content ${selectedIdx != null && selectedIdx.includes(idx) ? "bg-primary/10" : ""}`}
                     >
-                      {m.hasData ? fmt(m.total) : <span className="font-normal text-base-content/25">-</span>}
+                      {m.hasData ? fmt(m.total) : <span className="font-normal text-base-content/40">-</span>}
                     </td>
                   ))}
                   <td className="stat-figure-num px-2 py-1.5 text-right text-base-content">{fmt(scopeTotal)}</td>
@@ -263,7 +263,7 @@ export function PatientCategoryCard({
               </tbody>
             </table>
           </div>
-          <p className="mt-2 text-[13px] text-base-content/65">
+          <p className="mt-2 text-[13px] text-base-content/78">
             ร้อยละ = จำนวนของประเภทนั้น ÷ ผู้รับบริการทั้งหมดในเดือนเดียวกัน · ประเภท 1–5 รวมห้องเจาะเลือด OPD และ กว. ·
             ส่งสิ่งส่งตรวจรวม OPD, กว. และ SMC · ตรวจสุขภาพบุคลากร = ห้องเจาะเลือดงานเวชกรรมฯ
           </p>

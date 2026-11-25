@@ -25,7 +25,7 @@ export default function EntryPage() {
           <h1 className="text-xl font-semibold tracking-tight text-base-content sm:text-2xl">
             กรอกข้อมูลรายเดือน
           </h1>
-          <p className="mt-1 text-sm text-base-content/70">
+          <p className="mt-1 text-sm text-base-content/82">
             จำนวนผู้รับบริการหน่วยเจาะเลือด เก็บสิ่งส่งตรวจ และ POCT
           </p>
         </div>

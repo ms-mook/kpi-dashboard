@@ -52,13 +52,13 @@ export function AttendanceYearTable({
     <BentoCard i={0} className="!p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Table2 size={16} className="text-base-content/65" />
+          <Table2 size={16} className="text-base-content/78" />
           <h2 className="text-sm font-semibold text-base-content">ตารางข้อมูลทั้งปี (รายเดือน)</h2>
         </div>
         <div className="flex items-center gap-2">
           <a
             href={`/api/records/export?year=${selectedYear}`}
-            className="btn btn-sm btn-outline gap-1.5 border-base-content/15 text-base-content/80 hover:border-primary hover:text-primary"
+            className="btn btn-sm btn-outline gap-1.5 border-base-content/15 text-base-content/88 hover:border-primary hover:text-primary"
             title="ดาวน์โหลดตารางนี้เป็นไฟล์ Excel (.xlsx)"
           >
             <FileDown size={14} />
@@ -79,7 +79,7 @@ export function AttendanceYearTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1100px] text-xs">
           <thead>
-            <tr className="border-b border-base-content/10 text-base-content/70">
+            <tr className="border-b border-base-content/10 text-base-content/82">
               <th className="sticky left-0 z-10 bg-base-100/90 py-2 pr-3 text-left font-medium backdrop-blur-sm">
                 จุดบริการ / ประเภท
               </th>
@@ -100,10 +100,10 @@ export function AttendanceYearTable({
                   {pointRows.map((row) => (
                     <tr
                       key={`${row.point}|${row.type}`}
-                      className="border-b border-base-content/5 text-base-content/80 hover:bg-base-content/3"
+                      className="border-b border-base-content/5 text-base-content/88 hover:bg-base-content/3"
                     >
                       <td className="sticky left-0 z-10 bg-base-100/90 py-1.5 pr-3 backdrop-blur-sm">
-                        <span className="text-base-content/65">{meta.short} · </span>
+                        <span className="text-base-content/78">{meta.short} · </span>
                         {row.type}
                       </td>
                       {row.values.map((v, i) => (

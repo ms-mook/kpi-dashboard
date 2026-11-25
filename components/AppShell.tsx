@@ -25,7 +25,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             className={`flex items-center gap-3 rounded-field px-3 py-2.5 text-sm font-medium transition-colors ${
               active
                 ? "bg-primary/15 text-primary"
-                : "text-base-content/80 hover:bg-base-content/5 hover:text-base-content"
+                : "text-base-content/88 hover:bg-base-content/5 hover:text-base-content"
             }`}
           >
             <Icon size={18} strokeWidth={2} />
@@ -45,7 +45,7 @@ function Brand() {
       </span>
       <div className="leading-tight">
         <div className="text-sm font-semibold text-base-content">หน่วยเจาะเลือด</div>
-        <div className="text-xs text-base-content/70">รพ.ศรีนครินทร์</div>
+        <div className="text-xs text-base-content/82">รพ.ศรีนครินทร์</div>
       </div>
     </div>
   );
@@ -61,7 +61,7 @@ function LogoutButton({ className }: { className?: string }) {
   return (
     <button
       onClick={handleLogout}
-      className={`flex items-center gap-3 rounded-field px-3 py-2.5 text-sm font-medium text-base-content/80 transition-colors hover:bg-base-content/5 hover:text-error ${className ?? ""}`}
+      className={`flex items-center gap-3 rounded-field px-3 py-2.5 text-sm font-medium text-base-content/88 transition-colors hover:bg-base-content/5 hover:text-error ${className ?? ""}`}
     >
       <LogOut size={18} strokeWidth={2} />
       ออกจากระบบ
@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <NavLinks />
           <div className="mt-auto flex flex-col gap-2">
             <ThemeSwitcher className="w-full justify-between" />
-            <div className="rounded-field border border-base-content/8 bg-base-content/3 p-3 text-xs text-base-content/70">
+            <div className="rounded-field border border-base-content/8 bg-base-content/3 p-3 text-xs text-base-content/82">
               ข้อมูลซิงก์กับ Google Sheet แบบเรียลไทม์
             </div>
             <LogoutButton />

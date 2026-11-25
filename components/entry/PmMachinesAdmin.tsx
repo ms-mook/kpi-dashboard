@@ -124,14 +124,14 @@ export function PmMachinesAdmin({
       <div className="modal-box max-w-lg">
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Settings2 size={16} className="text-base-content/70" />
+            <Settings2 size={16} className="text-base-content/82" />
             <h3 className="text-sm font-semibold text-base-content">จัดการเครื่อง PM</h3>
           </div>
           <button onClick={onClose} aria-label="ปิด" className="btn btn-ghost btn-xs btn-circle">
             <X size={14} />
           </button>
         </div>
-        <p className="mb-4 text-[13px] text-base-content/65">
+        <p className="mb-4 text-[13px] text-base-content/78">
           เพิ่มเครื่องใหม่เมื่อมีการนำเครื่องรุ่น/บริษัทใหม่เข้ามา หรือปิดใช้งานเครื่องที่เลิกใช้แล้ว —
           ข้อมูลย้อนหลังของเครื่องที่ปิดใช้งานจะยังอยู่ใน Google Sheet เหมือนเดิม ไม่ถูกลบ
         </p>
@@ -139,7 +139,7 @@ export function PmMachinesAdmin({
         {error && <StatusBanner type="error" message={error} className="mb-3" />}
 
         {loading ? (
-          <div className="flex items-center justify-center py-8 text-base-content/65">
+          <div className="flex items-center justify-center py-8 text-base-content/78">
             <Loader2 size={20} className="animate-spin" />
           </div>
         ) : (
@@ -170,7 +170,7 @@ export function PmMachinesAdmin({
                       }
                     }}
                   />
-                  <div className="flex items-center gap-1.5 text-[12px] text-base-content/65">
+                  <div className="flex items-center gap-1.5 text-[12px] text-base-content/78">
                     <span>รหัส:</span>
                     {m.isNew ? (
                       <input
@@ -190,14 +190,14 @@ export function PmMachinesAdmin({
                     onClick={() => removeDraftRow(i)}
                     aria-label="ลบแถวนี้"
                     title="ลบแถวนี้ (ยังไม่บันทึก)"
-                    className="btn btn-ghost btn-xs btn-circle text-base-content/65 hover:text-error"
+                    className="btn btn-ghost btn-xs btn-circle text-base-content/78 hover:text-error"
                   >
                     <Trash2 size={13} />
                   </button>
                 ) : (
                   <button
                     onClick={() => updateMachine(i, { active: !m.active })}
-                    className={`btn btn-xs gap-1 ${m.active ? "btn-ghost text-base-content/70" : "btn-ghost text-success"}`}
+                    className={`btn btn-xs gap-1 ${m.active ? "btn-ghost text-base-content/82" : "btn-ghost text-success"}`}
                     title={m.active ? "ปิดใช้งาน" : "เปิดใช้งานอีกครั้ง"}
                   >
                     {m.active ? <Trash2 size={13} /> : <RotateCcw size={13} />}
@@ -207,7 +207,7 @@ export function PmMachinesAdmin({
               </div>
             ))}
 
-            <button onClick={addMachine} className="btn btn-ghost btn-xs gap-1.5 text-base-content/75">
+            <button onClick={addMachine} className="btn btn-ghost btn-xs gap-1.5 text-base-content/85">
               <Plus size={14} />
               เพิ่มเครื่องใหม่
             </button>

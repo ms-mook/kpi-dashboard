@@ -98,7 +98,7 @@ export function ComplaintCountChart({
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <div className="mt-1 text-center text-[13px] text-base-content/70">
+      <div className="mt-1 text-center text-[13px] text-base-content/82">
         {entered.length === 0
           ? "ยังไม่มีข้อมูล"
           : yearTotal === 0

@@ -26,7 +26,7 @@ export function ThemeSwitcher({ className = "" }: { className?: string }) {
         onClick={toggleMode}
         title={mode === "dark" ? "สลับเป็นโหมดสว่าง" : "สลับเป็นโหมดมืด"}
         aria-label="สลับโหมดสว่าง/มืด"
-        className="icon-badge btn btn-circle btn-ghost glass-panel border-0 text-base-content/75 hover:text-primary"
+        className="icon-badge btn btn-circle btn-ghost glass-panel border-0 text-base-content/85 hover:text-primary"
       >
         {mode === "dark" ? <Moon size={18} strokeWidth={2.2} /> : <Sun size={18} strokeWidth={2.2} />}
       </button>
@@ -36,13 +36,13 @@ export function ThemeSwitcher({ className = "" }: { className?: string }) {
           onClick={() => setOpen((o) => !o)}
           title="เลือกธีมสี"
           aria-label="เลือกธีมสี"
-          className="icon-badge btn btn-circle btn-ghost glass-panel border-0 text-base-content/75 hover:text-primary"
+          className="icon-badge btn btn-circle btn-ghost glass-panel border-0 text-base-content/85 hover:text-primary"
         >
           <Palette size={18} strokeWidth={2.2} />
         </button>
         {open && (
           <div className="glass-panel banner-enter absolute right-0 top-full z-50 mt-2 w-44 rounded-box p-2 shadow-xl">
-            <div className="px-2 pb-1.5 text-[13px] font-medium uppercase tracking-wide text-base-content/65">
+            <div className="px-2 pb-1.5 text-[13px] font-medium uppercase tracking-wide text-base-content/78">
               ธีมสี
             </div>
             {THEME_FAMILIES.map((f) => (
@@ -52,7 +52,7 @@ export function ThemeSwitcher({ className = "" }: { className?: string }) {
                   setFamily(f.id);
                   setOpen(false);
                 }}
-                className="flex w-full items-center gap-2.5 rounded-field px-2.5 py-2 text-sm text-base-content/80 transition-colors hover:bg-base-content/5"
+                className="flex w-full items-center gap-2.5 rounded-field px-2.5 py-2 text-sm text-base-content/88 transition-colors hover:bg-base-content/5"
               >
                 <span
                   className="h-3.5 w-3.5 shrink-0 rounded-full"

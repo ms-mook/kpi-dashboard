@@ -13,7 +13,7 @@
   --color-base-100: #0A0E18;
   --color-base-200: #0F1524;
   --color-base-300: #161D30;
-  --color-base-content: #E7EAF3;
+  --color-base-content: #F3F5FA;
 
   --color-primary: #3DA9FC;
   --color-primary-content: #06101E;
@@ -50,7 +50,7 @@
   --color-base-100: #F6F8FC;
   --color-base-200: #EAEEF6;
   --color-base-300: #DCE2EE;
-  --color-base-content: #1A2233;
+  --color-base-content: #0E1422;
 
   --color-primary: #1C7FD6;
   --color-primary-content: #F6F8FC;
@@ -88,7 +88,7 @@
   --color-base-100: #081411;
   --color-base-200: #0C1B17;
   --color-base-300: #122820;
-  --color-base-content: #E4F3EC;
+  --color-base-content: #F0FAF5;
 
   --color-primary: #34D399;
   --color-primary-content: #052015;
@@ -125,7 +125,7 @@
   --color-base-100: #F5FAF7;
   --color-base-200: #E8F3EC;
   --color-base-300: #D9EAE1;
-  --color-base-content: #122018;
+  --color-base-content: #0A160F;
 
   --color-primary: #0E9F6E;
   --color-primary-content: #F5FAF7;
@@ -163,7 +163,7 @@
   --color-base-100: #0D0B16;
   --color-base-200: #130F20;
   --color-base-300: #1C1630;
-  --color-base-content: #ECE8F7;
+  --color-base-content: #F5F2FC;
 
   --color-primary: #B794F6;
   --color-primary-content: #140A24;
@@ -200,7 +200,7 @@
   --color-base-100: #FAF8FD;
   --color-base-200: #F0EBF9;
   --color-base-300: #E3D9F3;
-  --color-base-content: #1E1830;
+  --color-base-content: #140F22;
 
   --color-primary: #8B5CF6;
   --color-primary-content: #FAF8FD;
@@ -262,8 +262,9 @@
 /* Readability: a step-larger type scale than Tailwind's default (only font
    sizes change, not spacing), with Thai-friendly line heights so stacked
    vowels and tone marks never touch the line above. Faint secondary text
-   was also raised to >= 65% opacity in the components (>= 4.5:1 contrast in
-   both light and dark themes). */
+   was raised to >= 78% opacity in the components, and the base text colour
+   is near-black (light) / near-white (dark): every text level is >= 8:1
+   contrast in both themes. */
 @theme {
   --text-xs: 0.8125rem; /* 13px (was 12) */
   --text-xs--line-height: 1.6;

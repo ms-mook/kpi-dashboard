@@ -295,14 +295,14 @@ export function KpiIndicatorsAdmin({
       <div className="modal-box max-w-2xl">
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ListChecks size={16} className="text-base-content/70" />
+            <ListChecks size={16} className="text-base-content/82" />
             <h3 className="text-sm font-semibold text-base-content">จัดการตัวชี้วัดคุณภาพ</h3>
           </div>
           <button onClick={onClose} aria-label="ปิด" className="btn btn-ghost btn-xs btn-circle">
             <X size={14} />
           </button>
         </div>
-        <p className="mb-4 text-[13px] text-base-content/65">
+        <p className="mb-4 text-[13px] text-base-content/78">
           ปิดใช้งานตัวชี้วัดข้อใดก็ได้ (รวมทั้ง 6 ข้อเดิม) เพื่อซ่อนออกจากหน้ากรอกข้อมูลและแดชบอร์ด หรือเพิ่มตัวชี้วัดใหม่ —
           ข้อมูลย้อนหลังของตัวชี้วัดที่ปิดใช้งานจะยังอยู่ใน Google Sheet เหมือนเดิม ไม่ถูกลบ
         </p>
@@ -310,7 +310,7 @@ export function KpiIndicatorsAdmin({
         {error && <StatusBanner type="error" message={error} className="mb-3" />}
 
         {loading ? (
-          <div className="flex items-center justify-center py-8 text-base-content/65">
+          <div className="flex items-center justify-center py-8 text-base-content/78">
             <Loader2 size={20} className="animate-spin" />
           </div>
         ) : (
@@ -354,7 +354,7 @@ export function KpiIndicatorsAdmin({
                           onChange={(e) => updateItem(i, { criteria: e.target.value })}
                         />
                         <div className="flex flex-wrap items-center gap-2">
-                          <label className="text-[12px] text-base-content/65">รูปแบบการกรอกข้อมูล:</label>
+                          <label className="text-[12px] text-base-content/78">รูปแบบการกรอกข้อมูล:</label>
                           {it.isNew ? (
                             <select
                               className="select select-xs select-bordered bg-base-200/60"
@@ -366,7 +366,7 @@ export function KpiIndicatorsAdmin({
                               ))}
                             </select>
                           ) : (
-                            <span className="text-[13px] text-base-content/70">{KIND_LABELS[it.kind as CustomKind]}</span>
+                            <span className="text-[13px] text-base-content/82">{KIND_LABELS[it.kind as CustomKind]}</span>
                           )}
                         </div>
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -395,7 +395,7 @@ export function KpiIndicatorsAdmin({
                             />
                           )}
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 text-[12px] text-base-content/65">
+                        <div className="flex flex-wrap items-center gap-2 text-[12px] text-base-content/78">
                           <span>เป้าหมาย:</span>
                           <input
                             type="text"
@@ -431,7 +431,7 @@ export function KpiIndicatorsAdmin({
                               if (v === "" || /^\d*$/.test(v)) updateItem(i, { decimals: v });
                             }}
                           />
-                          <span className="ml-auto font-mono text-base-content/30">รหัส: {it.id}</span>
+                          <span className="ml-auto font-mono text-base-content/45">รหัส: {it.id}</span>
                         </div>
                       </>
                     ) : it.editing ? (
@@ -458,7 +458,7 @@ export function KpiIndicatorsAdmin({
                           onChange={(e) => updateItem(i, { criteria: e.target.value })}
                         />
                         {it.baseKind !== "incident" && (
-                          <div className="flex flex-wrap items-center gap-2 text-[12px] text-base-content/65">
+                          <div className="flex flex-wrap items-center gap-2 text-[12px] text-base-content/78">
                             <span>เป้าหมาย:</span>
                             <input
                               type="text"
@@ -496,14 +496,14 @@ export function KpiIndicatorsAdmin({
                             />
                           </div>
                         )}
-                        <p className="text-[12px] text-base-content/30">
+                        <p className="text-[12px] text-base-content/45">
                           ชื่อช่องกรอกข้อมูลภายในของตัวชี้วัดเดิมแก้ไขไม่ได้จากหน้านี้ — การแก้ชื่อ/เกณฑ์/เป้าหมายไม่กระทบข้อมูลย้อนหลัง
                         </p>
                       </div>
                     ) : (
                       <div>
-                        <div className="text-xs font-semibold text-base-content/80">{it.shortName}</div>
-                        <div className="mt-0.5 text-[13px] text-base-content/65">{it.criteria}</div>
+                        <div className="text-xs font-semibold text-base-content/88">{it.shortName}</div>
+                        <div className="mt-0.5 text-[13px] text-base-content/78">{it.criteria}</div>
                       </div>
                     )}
                   </div>
@@ -513,7 +513,7 @@ export function KpiIndicatorsAdmin({
                       onClick={() => removeDraftRow(i)}
                       aria-label="ลบแถวนี้"
                       title="ลบแถวนี้ (ยังไม่บันทึก)"
-                      className="btn btn-ghost btn-xs btn-circle shrink-0 text-base-content/65 hover:text-error"
+                      className="btn btn-ghost btn-xs btn-circle shrink-0 text-base-content/78 hover:text-error"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -522,7 +522,7 @@ export function KpiIndicatorsAdmin({
                     {!it.isCustom && (
                       <button
                         onClick={() => updateItem(i, { editing: !it.editing })}
-                        className="btn btn-ghost btn-xs gap-1 text-base-content/70"
+                        className="btn btn-ghost btn-xs gap-1 text-base-content/82"
                         title="แก้ไขชื่อ/เกณฑ์/เป้าหมาย"
                       >
                         <Pencil size={12} />
@@ -531,7 +531,7 @@ export function KpiIndicatorsAdmin({
                     )}
                     <button
                       onClick={() => updateItem(i, { active: !it.active })}
-                      className={`btn btn-xs shrink-0 gap-1 ${it.active ? "btn-ghost text-base-content/70" : "btn-ghost text-success"}`}
+                      className={`btn btn-xs shrink-0 gap-1 ${it.active ? "btn-ghost text-base-content/82" : "btn-ghost text-success"}`}
                       title={it.active ? "ปิดใช้งาน" : "เปิดใช้งานอีกครั้ง"}
                     >
                       {it.active ? <Trash2 size={13} /> : <RotateCcw size={13} />}
@@ -543,7 +543,7 @@ export function KpiIndicatorsAdmin({
               </div>
             ))}
 
-            <button onClick={addCustom} className="btn btn-ghost btn-xs gap-1.5 text-base-content/75">
+            <button onClick={addCustom} className="btn btn-ghost btn-xs gap-1.5 text-base-content/85">
               <Plus size={14} />
               เพิ่มตัวชี้วัดใหม่
             </button>

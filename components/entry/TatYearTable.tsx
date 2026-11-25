@@ -43,13 +43,13 @@ export function TatYearTable({
     <BentoCard i={0} className="!p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Table2 size={16} className="text-base-content/65" />
+          <Table2 size={16} className="text-base-content/78" />
           <h2 className="text-sm font-semibold text-base-content">ตาราง TAT ทั้งปี (รายเดือน)</h2>
         </div>
         <div className="flex items-center gap-2">
           <a
             href={`/api/tat/export?year=${selectedYear}`}
-            className="btn btn-sm btn-outline gap-1.5 border-base-content/15 text-base-content/80 hover:border-primary hover:text-primary"
+            className="btn btn-sm btn-outline gap-1.5 border-base-content/15 text-base-content/88 hover:border-primary hover:text-primary"
             title="ดาวน์โหลดตารางนี้เป็นไฟล์ Excel (.xlsx)"
           >
             <FileDown size={14} />
@@ -70,7 +70,7 @@ export function TatYearTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1100px] text-xs">
           <thead>
-            <tr className="border-b border-base-content/10 text-base-content/70">
+            <tr className="border-b border-base-content/10 text-base-content/82">
               <th className="sticky left-0 z-10 bg-base-100/90 py-2 pr-3 text-left font-medium backdrop-blur-sm">
                 จุดบริการ / ขั้นตอน
               </th>
@@ -92,11 +92,11 @@ export function TatYearTable({
                       <tr
                         key={`${row.point}|${row.stage}`}
                         className={`border-b border-base-content/5 hover:bg-base-content/3 ${
-                          stageMeta.total ? "font-semibold text-base-content" : "text-base-content/80"
+                          stageMeta.total ? "font-semibold text-base-content" : "text-base-content/88"
                         }`}
                       >
                         <td className="sticky left-0 z-10 bg-base-100/90 py-1.5 pr-3 backdrop-blur-sm">
-                          <span className="text-base-content/65" style={{ color: stageMeta.total ? meta.color : undefined }}>
+                          <span className="text-base-content/78" style={{ color: stageMeta.total ? meta.color : undefined }}>
                             {stageMeta.total ? meta.short + " · " : `${meta.short} · `}
                           </span>
                           {row.stage}
@@ -118,7 +118,7 @@ export function TatYearTable({
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-[13px] text-base-content/65">หน่วยเป็นนาที · &quot;-&quot; หมายถึงยังไม่มีข้อมูลเดือนนั้น</p>
+      <p className="mt-3 text-[13px] text-base-content/78">หน่วยเป็นนาที · &quot;-&quot; หมายถึงยังไม่มีข้อมูลเดือนนั้น</p>
     </BentoCard>
   );
 }

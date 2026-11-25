@@ -63,9 +63,9 @@ function TypeBreakdownBars({
           <div key={d.type} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3">
             <div className="flex min-w-0 items-center gap-2">
               <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: color }} />
-              <span className="truncate text-xs text-base-content/75" title={d.type}>{d.type}</span>
+              <span className="truncate text-xs text-base-content/85" title={d.type}>{d.type}</span>
             </div>
-            <div className="stat-figure-num w-14 shrink-0 text-right text-xs text-base-content/80">
+            <div className="stat-figure-num w-14 shrink-0 text-right text-xs text-base-content/88">
               {d.total.toLocaleString()}
             </div>
             <div className="w-10 shrink-0 text-right text-[13px] font-semibold" style={{ color }}>
@@ -186,7 +186,7 @@ function comparedMonthsLabel(months: number[]): string {
 function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[13px] font-medium text-base-content/65">{label}</span>
+      <span className="text-[13px] font-medium text-base-content/78">{label}</span>
       {children}
     </div>
   );
@@ -216,7 +216,7 @@ export default function DashboardPage() {
         fontSize: 13,
         color: isLight ? "#1A2033" : "#E7EAF3",
       },
-      axisTick: isLight ? "#4B5567" : "#A3AECB",
+      axisTick: isLight ? "#374151" : "#BCC5DD",
       grid: isLight ? "rgba(15,21,36,0.09)" : "rgba(255,255,255,0.06)",
       cursor: isLight ? "rgba(15,21,36,0.05)" : "rgba(255,255,255,0.04)",
     }),
@@ -767,7 +767,7 @@ export default function DashboardPage() {
               </select>
             </FilterField>
             {filtersActive && (
-              <button type="button" onClick={resetFilters} className="btn btn-ghost btn-sm text-base-content/75">
+              <button type="button" onClick={resetFilters} className="btn btn-ghost btn-sm text-base-content/85">
                 ล้างตัวกรอง
               </button>
             )}
@@ -780,13 +780,13 @@ export default function DashboardPage() {
               <div className="flex h-full flex-col justify-between">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="flex items-center gap-2 text-xs font-medium text-base-content/70">
+                    <div className="flex items-center gap-2 text-xs font-medium text-base-content/82">
                       <Users size={14} />
                       จำนวนผู้รับบริการ · {scopeLabel}
                     </div>
                     <div className="mt-3 text-4xl font-bold text-base-content sm:text-5xl">
                       <CountUp value={grandTotal} />
-                      <span className="ml-2 text-base font-medium text-base-content/65">คน</span>
+                      <span className="ml-2 text-base font-medium text-base-content/78">คน</span>
                     </div>
                   </div>
                   {heroChange && (
@@ -806,7 +806,7 @@ export default function DashboardPage() {
                         )}
                         {Math.abs(heroChange.pctChange).toFixed(1)}%
                       </div>
-                      <span className="text-right text-[12px] text-base-content/65">
+                      <span className="text-right text-[12px] text-base-content/78">
                         เทียบ {heroChange.compared} เดือนเดียวกันของปีก่อน
                       </span>
                     </div>
@@ -844,7 +844,7 @@ export default function DashboardPage() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/65">
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/78">
                   แนวโน้ม 6 ปีล่าสุด{pointFilter !== "all" ? " (ทุกจุดบริการ)" : ""}
                   {incompleteTrend && (
                     <span className="rounded-field bg-warning/15 px-1.5 py-0.5 text-[12px] font-medium text-warning">
@@ -878,7 +878,7 @@ export default function DashboardPage() {
                       {pct.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="mt-0.5 truncate text-sm font-medium text-base-content/80">{p.point}</div>
+                  <div className="mt-0.5 truncate text-sm font-medium text-base-content/88">{p.point}</div>
                 </BentoCard>
               );
             })}
@@ -890,7 +890,7 @@ export default function DashboardPage() {
               <h2 className="text-sm font-semibold text-base-content">
                 จำนวนผู้รับบริการรายเดือน แยกตามจุดบริการ
               </h2>
-              <span className="text-xs text-base-content/65">
+              <span className="text-xs text-base-content/78">
                 {yearLabel}{filterSuffix ? ` · ${filterSuffix}` : ""}
               </span>
             </div>
@@ -927,11 +927,11 @@ export default function DashboardPage() {
               return (
                 <BentoCard key={point} i={6 + idx} className="!p-5">
                   <div className="mb-3 flex items-center justify-between">
-                    <h3 className="flex items-center gap-2 text-xs font-semibold text-base-content/80">
+                    <h3 className="flex items-center gap-2 text-xs font-semibold text-base-content/88">
                       <span className="h-2 w-2 rounded-full" style={{ background: meta.color }} />
                       {point}
                     </h3>
-                    <span className="text-[13px] text-base-content/65">{scopeLabel}</span>
+                    <span className="text-[13px] text-base-content/78">{scopeLabel}</span>
                   </div>
                   <TypeBreakdownBars data={data} palette={meta.palette} />
                 </BentoCard>
@@ -1028,7 +1028,7 @@ export default function DashboardPage() {
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-base-content/8 text-base-content/65">
+              <tr className="border-b border-base-content/8 text-base-content/78">
                 <th className="py-1.5 text-left font-medium">ปี</th>
                 <th className="py-1.5 text-right font-medium">รวม</th>
                 <th className="py-1.5 text-right font-medium">% เปลี่ยนแปลง</th>
@@ -1037,7 +1037,7 @@ export default function DashboardPage() {
             <tbody>
               {trend.map((t) => (
                 <tr key={t.year} className="border-b border-base-content/5">
-                  <td className="py-1.5 text-base-content/80">
+                  <td className="py-1.5 text-base-content/88">
                     {t.year}
                     {!t.complete && (
                       <span className="ml-1.5 rounded-field bg-warning/15 px-1.5 py-0.5 text-[12px] font-medium text-warning">
@@ -1055,7 +1055,7 @@ export default function DashboardPage() {
                   >
                     {t.pctChange == null ? "-" : `${t.pctChange.toFixed(1)}%`}
                     {!t.complete && t.pctChange != null && (
-                      <div className="text-[12px] text-base-content/65">
+                      <div className="text-[12px] text-base-content/78">
                         เทียบ {comparedMonthsLabel(t.comparedMonths)} ปีก่อน
                       </div>
                     )}
@@ -1063,7 +1063,7 @@ export default function DashboardPage() {
                 </tr>
               ))}
               {forecast && (
-                <tr className="border-b border-base-content/5 text-base-content/65 italic">
+                <tr className="border-b border-base-content/5 text-base-content/78 italic">
                   <td className="py-1.5">
                     {forecast.year}{" "}
                     <span className="not-italic rounded-field bg-info/15 px-1.5 py-0.5 text-[12px] font-medium text-info">
@@ -1079,7 +1079,7 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-[13px] text-base-content/65">
+        <p className="mt-3 text-[13px] text-base-content/78">
           ปี 2563-2568: ยอดรวมจากไฟล์เดิม (ไม่แยกจุดบริการ) · ปี 2569 เป็นต้นไป: คำนวณจากข้อมูลที่กรอกจริง
           {forecast && " · พยากรณ์: เส้นแนวโน้มเชิงเส้นอย่างง่ายจากปีงบที่มีข้อมูลครบ 12 เดือน ไม่ได้คำนึงถึงปัจจัยอื่น เช่น การเปลี่ยนแปลงกำลังคนหรือนโยบาย"}
         </p>
@@ -1120,7 +1120,7 @@ export default function DashboardPage() {
                 <h3 className="text-sm font-semibold text-base-content">
                   เปรียบเทียบ 4 จุดบริการ
                 </h3>
-                <span className="text-xs text-base-content/65">
+                <span className="text-xs text-base-content/78">
                   {tatMonths[tatCompare.month - 1]} {tatYear}
                 </span>
               </div>
@@ -1170,7 +1170,7 @@ export default function DashboardPage() {
             </BentoCard>
           )}
 
-          <div className="mb-3 text-xs font-medium text-base-content/65">รายละเอียดแนวโน้มแต่ละจุดบริการ</div>
+          <div className="mb-3 text-xs font-medium text-base-content/78">รายละเอียดแนวโน้มแต่ละจุดบริการ</div>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {tatChartDataByPoint.map(({ point, data }, idx) => {
               const meta = pointMeta(point);
@@ -1178,7 +1178,7 @@ export default function DashboardPage() {
                 <BentoCard key={point} i={11 + idx} className="!p-5">
                   <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-base-content">
                     <span style={{ color: meta.color }}>{meta.short}</span>
-                    <span className="text-xs font-normal text-base-content/65">{point}</span>
+                    <span className="text-xs font-normal text-base-content/78">{point}</span>
                   </h3>
                   <ResponsiveContainer width="100%" height={240}>
                     <LineChart data={data}>
@@ -1230,8 +1230,8 @@ export default function DashboardPage() {
       {kpiTrendByIndicator.length > 0 && (
         <>
           <div id="sec-kpi-trend" className="mb-3 mt-8 flex scroll-mt-24 items-center justify-between gap-2">
-            <h3 className="text-xs font-medium text-base-content/70">แนวโน้มรายตัวชี้วัด</h3>
-            <label className="flex cursor-pointer items-center gap-2 text-xs text-base-content/75">
+            <h3 className="text-xs font-medium text-base-content/82">แนวโน้มรายตัวชี้วัด</h3>
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-base-content/85">
               <input
                 type="checkbox"
                 className="toggle toggle-xs toggle-primary"
@@ -1255,11 +1255,11 @@ export default function DashboardPage() {
               return (
               <BentoCard key={indicator.id} i={23 + idx} className="!p-5">
                 <div className="mb-1 flex items-baseline justify-between gap-2">
-                  <h3 className="text-xs font-semibold text-base-content/80">
+                  <h3 className="text-xs font-semibold text-base-content/88">
                     {complaintCounts ? "จำนวนเรื่องร้องเรียนรายเดือน" : (indicator.shortName ?? indicator.name)}
                   </h3>
                   {!complaintCounts && indicator.target && !axis.targetInRange && (
-                    <span className="shrink-0 text-[12px] text-base-content/65">
+                    <span className="shrink-0 text-[12px] text-base-content/78">
                       เป้าหมาย {indicator.target.value}%
                     </span>
                   )}
@@ -1286,7 +1286,7 @@ export default function DashboardPage() {
                               ? "bg-success/15 text-success"
                               : d.status === "fail"
                                 ? "bg-error/15 text-error"
-                                : "bg-base-200/50 text-base-content/25"
+                                : "bg-base-200/50 text-base-content/40"
                           }`}
                         >
                           {d.count == null ? <span className="text-[12px] font-normal">–</span> : d.count}
@@ -1295,11 +1295,11 @@ export default function DashboardPage() {
                     </div>
                     <div className="grid grid-cols-12 gap-1.5">
                       {data.map((d, i) => (
-                        <span key={i} className="text-center text-[11px] text-base-content/65">{d.month}</span>
+                        <span key={i} className="text-center text-[11px] text-base-content/78">{d.month}</span>
                       ))}
                     </div>
                     {latestIncident && (
-                      <div className="text-center text-[13px] text-base-content/70">
+                      <div className="text-center text-[13px] text-base-content/82">
                         {incidentMax != null
                           ? `สะสมปีงบ ${latestIncident.ytdCount ?? latestIncident.count}/${incidentMax} ครั้ง (เกณฑ์ไม่เกิน ${incidentMax} ครั้งต่อปี)`
                           : "จำนวนครั้งต่อเดือน (เกณฑ์ 0 ครั้ง)"}
@@ -1368,7 +1368,7 @@ export default function DashboardPage() {
               );
             })}
           </div>
-          <p className="mt-3 text-[13px] text-base-content/65">
+          <p className="mt-3 text-[13px] text-base-content/78">
             เกณฑ์ประเมินของแต่ละตัวชี้วัดเป็นค่าเริ่มต้น — ปรับข้อความเกณฑ์จริงได้ที่หน้ากรอกข้อมูล (ตัวชี้วัดคุณภาพ)
           </p>
         </>
@@ -1390,7 +1390,7 @@ export default function DashboardPage() {
             <h1 className="text-xl font-semibold tracking-tight text-base-content sm:text-2xl">
               สถิติงานบริการหน่วยเจาะเลือด เก็บสิ่งส่งตรวจ และ POCT
             </h1>
-            <p className="mt-1 text-sm text-base-content/70">โรงพยาบาลศรีนครินทร์</p>
+            <p className="mt-1 text-sm text-base-content/82">โรงพยาบาลศรีนครินทร์</p>
             <LiveClock className="mt-1.5" />
           </div>
         </div>
@@ -1400,7 +1400,7 @@ export default function DashboardPage() {
             href="/entry"
             title="เข้าสู่ระบบกรอกข้อมูล"
             aria-label="เข้าสู่ระบบกรอกข้อมูล"
-            className="btn btn-circle btn-ghost glass-panel border-0 text-base-content/75 hover:text-primary"
+            className="btn btn-circle btn-ghost glass-panel border-0 text-base-content/85 hover:text-primary"
           >
             <KeyRound size={18} strokeWidth={2.2} />
           </Link>

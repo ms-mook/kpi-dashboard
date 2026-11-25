@@ -8,7 +8,7 @@ export function CompletenessBadge({ filled, total = 12 }: { filled: number; tota
   return (
     <div
       className={`badge gap-1.5 border-0 text-xs ${
-        complete ? "bg-success/15 text-success" : "bg-base-content/5 text-base-content/70"
+        complete ? "bg-success/15 text-success" : "bg-base-content/5 text-base-content/82"
       }`}
       title={`บันทึกข้อมูลแล้ว ${filled} จาก ${total} เดือนในปีงบประมาณนี้`}
     >

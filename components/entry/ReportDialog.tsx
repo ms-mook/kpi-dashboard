@@ -92,7 +92,7 @@ export function ReportDialog({ onClose }: { onClose: () => void }) {
 
   const personFields = (label: string, p: Person, set: (p: Person) => void) => (
     <fieldset className="space-y-2">
-      <legend className="text-xs font-medium text-base-content/80">{label}</legend>
+      <legend className="text-xs font-medium text-base-content/88">{label}</legend>
       <input
         className="input input-bordered input-sm w-full"
         placeholder="ชื่อ - สกุล"
@@ -115,14 +115,14 @@ export function ReportDialog({ onClose }: { onClose: () => void }) {
       <div className="modal-box max-w-lg">
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FileText size={16} className="text-base-content/70" />
+            <FileText size={16} className="text-base-content/82" />
             <h3 className="text-sm font-semibold text-base-content">สร้างรายงาน PDF</h3>
           </div>
           <button onClick={onClose} aria-label="ปิด" className="btn btn-ghost btn-xs btn-circle">
             <X size={14} />
           </button>
         </div>
-        <p className="mb-4 text-[13px] text-base-content/65">
+        <p className="mb-4 text-[13px] text-base-content/78">
           สรุปจำนวนผู้รับบริการ TAT และตัวชี้วัดคุณภาพ สำหรับส่งผู้บริหาร/งานประกันคุณภาพ
           — ตัวเลขดึงจากข้อมูลชุดเดียวกับแดชบอร์ด
         </p>
@@ -177,14 +177,14 @@ export function ReportDialog({ onClose }: { onClose: () => void }) {
             </select>
           </div>
           {type === "fiscal" && (
-            <p className="-mt-2 text-[13px] text-base-content/65">
+            <p className="-mt-2 text-[13px] text-base-content/78">
               ต.ค. {year - 1} – ก.ย. {year}
             </p>
           )}
 
           <label className="block space-y-1">
-            <span className="text-xs font-medium text-base-content/80">
-              ข้อสังเกต/ความเห็น <span className="text-base-content/65">(ไม่บังคับ)</span>
+            <span className="text-xs font-medium text-base-content/88">
+              ข้อสังเกต/ความเห็น <span className="text-base-content/78">(ไม่บังคับ)</span>
             </span>
             <textarea
               className="textarea textarea-bordered w-full text-sm"
