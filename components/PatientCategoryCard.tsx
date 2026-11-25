@@ -159,15 +159,18 @@ export function PatientCategoryCard({
                   <div className="stat-figure-num mt-1 text-base font-bold text-base-content">
                     {mode === "count" ? fmt(headline) : `${pct(headline, scopeTotal).toFixed(1)}%`}
                   </div>
-                  <ResponsiveContainer width="100%" height={72}>
+                  <ResponsiveContainer width="100%" height={88}>
                     <BarChart data={series} margin={{ top: 4, right: 0, bottom: 0, left: 0 }} barCategoryGap="18%">
+                      {/* One label per quarter (every 3rd month): 12 labels don't
+                          fit a small card at a readable size. Tall enough for
+                          Thai vowels/tone marks below and above the line. */}
                       <XAxis
                         dataKey="month"
-                        interval="preserveStartEnd"
-                        tick={{ fontSize: 11, fill: colors.axisTick }}
+                        interval={2}
+                        tick={{ fontSize: 12, fill: colors.axisTick }}
                         axisLine={false}
                         tickLine={false}
-                        height={14}
+                        height={24}
                       />
                       <YAxis hide domain={[0, "auto"]} />
                       <Tooltip
